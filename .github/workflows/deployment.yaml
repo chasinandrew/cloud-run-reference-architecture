@@ -48,7 +48,7 @@ jobs:
         id: build-image
         uses: docker/build-push-action@v3
         with:
-          context: ./code/${{ env.FRONTEND_DIRECTORY }}
+          context: ${{ env.FRONTEND_DIRECTORY }}
           push: true 
           tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}:${{ env.FRONTEND_SERVICE }}
       
