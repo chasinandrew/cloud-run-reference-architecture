@@ -51,7 +51,8 @@ jobs:
           context: ./code/${{ env.FRONTEND_DIRECTORY }}
           push: true 
           tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}:${{ env.FRONTEND_SERVICE }}
-
+      
+      - name: Docker Push
         run: |-
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}:${{ env.FRONTEND_SERVICE }}
 
