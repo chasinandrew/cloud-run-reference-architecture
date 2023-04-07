@@ -1,105 +1,76 @@
-name: Reusable - Base Terraform Workflow
+name: "Terraform"
 
 on:
   workflow_call:
-    inputs:
-      env:
-        required: true
-        type: string
-        description: Github Environment targeted for deployment.
-      tf-path:
-        required: false
-        type: string
-        default: "./"
-        description: Path to your terraform content. Ensure the working directory is set within your terraform cloud workspace to match. Defaults to root.
-      tf-plan:
-        required: false
-        type: boolean
-        default: false
-        description: Will run terraform plan. If set, an apply will not occur.      
-      tf-apply:
-        required: false
-        type: boolean
-        default: false
-        description: Will run terraform plan. If set, an apply will not occur.
-      tf-destroy:
-        required: false
-        type: boolean
-        default: false
-        description: When set, will perform a terraform destroy after an apply.
-      tf-version:
-        required: false
-        type: string
-        default: "~1.3.0"
-        description: Terraform version to target.
-      tf-workspace:
-        required: true
-        type: string
-        description: Name of Terraform Cloud workspace.
-      tf-refresh-false:
-        type: boolean
-        required: false
-        default: false
-        description: When set, will append `-refresh=false` to the plan and apply.
-      sleep: 
-        required: false
-        type: number
-        default: 300
-        description: Sets a sleep timer, in seconds, on a terraform destroy command.
-      variables: 
-        required: false
-        type: string
-        default: ""
-        description: Terraform variables that will be passed on the command line. Variables must be provided in json format without quotations.
-        # Expects a JSON formatted variable
-        #   variables: |
-        #     {
-        #       test1: "value1",
-        #       test2: "value2",
-        #       test3: [
-        #         "value3-a",
-        #         "value3-b"
-        #       ]
-        #     }
-
-    secrets:
-      TF_API_TOKEN:
-        required: true
 
 jobs:
-  terraform-workflow:
-    name: Terraform Workflow
-    runs-on: [self-hosted, Linux, x64, enterprise, terraform]  
-    environment: ${{ inputs.env }}
-    env:
-      TF_CLOUD_ORGANIZATION: hca-healthcare
-      TF_WORKSPACE: ${{ inputs.tf-workspace }}
-      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-
-    defaults:
-      run:
-        shell: bash
-        working-directory: ${{ inputs.tf-path }}
-
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - uses: ./.github/terraform-cli.yml
-      name: Terraform CLI Action 
-      id: terraform
-      with:
-        tf-path: ${{ inputs.tf-path }}
-        tf-plan: ${{ inputs.tf-plan }}
-        tf-apply: ${{ inputs.tf-apply }}
-        tf-destroy: ${{ inputs.tf-destroy }}
-        tf-version: ${{ inputs.tf-version }}
-        tf-refresh-false: ${{ inputs.tf-refresh-false }}
-        variables: ${{ inputs.variables }}
-        sleep: ${{ inputs.sleep }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          # terraform_version: 1.4.2
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-    - uses: actions/upload-artifact@v3
-      if: ${{ inputs.tf-plan }}
-      with:
-        name: tf-plan_output-${{ inputs.tf-workspace }}
-        path: |
-          ${{ steps.terraform.outputs.plan-file }}
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color -input=false
+        continue-on-error: true
+
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`terraform\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
