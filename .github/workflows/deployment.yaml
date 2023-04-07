@@ -101,6 +101,6 @@ jobs:
     # END - Docker auth and build
 
   terraform: 
-    uses: ./.github/terraform.yml
+    uses: ./.github/terraform.yml@v0
     needs: [deploy-frontend, deploy-backend]
 
