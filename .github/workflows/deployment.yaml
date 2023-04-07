@@ -12,6 +12,7 @@ env:
   FRONTEND_SERVICE: frontend # TODO: update Cloud Run service name
   FRONTEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
   REGION: us-east4 # TODO: update Cloud Run service region
+  IMAGE_TAG: latest
 
 jobs:
   deploy:
@@ -50,10 +51,10 @@ jobs:
         with:
           context: ${{ env.FRONTEND_DIRECTORY }}
           push: true 
-          tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}:${{ env.FRONTEND_SERVICE }}
+          tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}
       
       - name: Docker Push
         run: |-
-          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}:${{ env.FRONTEND_SERVICE }}
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}
 
       # END - Docker auth and build
