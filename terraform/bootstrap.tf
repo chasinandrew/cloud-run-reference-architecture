@@ -20,10 +20,10 @@
 #     ]
 # }
 
-resource "google_service_account" "gh_oidc" {
-    account_id = "gh-oidc-wif"
-    display_name = "Service Account for authenticating from GitHub to GCP to push container images."
-}
+# resource "google_service_account" "gh_oidc" {
+#     account_id = "gh-oidc-wif"
+#     display_name = "Service Account for authenticating from GitHub to GCP to push container images."
+# }
 
 # # resource "random_id" "repo_suffix" {
 # #     byte_length = 3
