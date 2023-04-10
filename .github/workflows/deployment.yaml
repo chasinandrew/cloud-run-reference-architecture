@@ -14,6 +14,7 @@ env:
   FRONTEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
   REGION: us-east4 # TODO: update Cloud Run service region
   IMAGE_TAG: latest
+  WORKING_DIRECTORY: ./terraform
 
 jobs:
   deploy-frontend:
@@ -118,18 +119,21 @@ jobs:
       - name: Terraform Format
         id: fmt
         run: terraform fmt 
-        
+
       - name: Terraform Init
         id: init
-        run: terraform init -chdir=terraform
+        run: terraform init
+        working-directory: ${{ env.WORKING_DIRECTORY }}
       
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false 
+        run: terraform plan -no-color -input=false
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
