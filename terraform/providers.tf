@@ -7,7 +7,7 @@ terraform {
     }
   }
   cloud {
-    organization = "google-org-testing"
+    organization = "google-testing-org"
     workspaces {
       name = "cloud-run-reference-architecture"
     }
