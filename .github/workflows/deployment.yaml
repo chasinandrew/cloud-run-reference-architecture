@@ -145,6 +145,6 @@ jobs:
         run: exit 1
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=dev.tfvars -var='frontend_container_image=${{ needs.deploy-backend.outputs.backend-image }}' -var='backend_container_image=${{ needs.deploy-frontend.outputs.frontend-image}}'
 
