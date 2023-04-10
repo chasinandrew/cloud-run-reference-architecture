@@ -10,8 +10,8 @@ terraform {
     organization = "google-org-testing"
     workspaces {
       name = "cloud-run-reference-architecture"
+    }
   }
-}
 }
 
 # provider "google" {
