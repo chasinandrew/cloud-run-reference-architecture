@@ -1,13 +1,22 @@
 
 
-# module "cloud_run" {
-#   source  = "./modules/cloud-run"
-#   # Required variables
-#   service_name           = "<SERVICE NAME>"
-#   project_id             = "<PROJECT ID>"
-#   location               = "<LOCATION>"
-#   image                  = var.container_image #TODO: add container image
-# }
+module "frontend_cloud_run" {
+  source  = "./modules/cloud-run"
+  # Required variables
+  service_name           = "frontend"
+  project_id             = var.project_id
+  location               = var.region
+  image                  = var.frontend_container_image
+}
+
+module "backend_cloud_run" {
+  source  = "./modules/cloud-run"
+  # Required variables
+  service_name           = "backend"
+  project_id             = var.project_id
+  location               = var.region
+  image                  = var.backend_container_image
+}
 
 # resource "google_sql_database_instance" "main" {
 #   name             = "${var.basename}-db-${random_id.id.hex}"

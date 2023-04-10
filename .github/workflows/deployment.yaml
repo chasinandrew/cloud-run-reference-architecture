@@ -24,6 +24,8 @@ jobs:
       id-token: 'write'
 
     runs-on: ubuntu-latest
+    outputs: 
+      frontend-image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -65,6 +67,8 @@ jobs:
       id-token: 'write'
 
     runs-on: ubuntu-latest
+    outputs:
+      backend-image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.BACKEND_SERVICE }}:${{ env.IMAGE_TAG }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -132,7 +136,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false -var-file=dev.tfvars
+        run: terraform plan -no-color -input=false -var-file=dev.tfvars -var='frontend_container_image=${{ needs.deploy-backend.outputs.backend-image }}' -var='backend_container_image=${{ needs.deploy-frontend.outputs.frontend-image}}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Terraform Plan Status
