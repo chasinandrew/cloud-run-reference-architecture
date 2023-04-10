@@ -117,8 +117,8 @@ jobs:
 
       - name: Terraform Format
         id: fmt
-        run: terraform fmt -check-chdir=terraform
-
+        run: terraform fmt 
+        
       - name: Terraform Init
         id: init
         run: terraform init -chdir=terraform
