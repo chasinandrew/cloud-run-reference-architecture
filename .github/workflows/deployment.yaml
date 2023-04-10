@@ -107,6 +107,7 @@ jobs:
 
   terraform: 
     name: "Terraform"
+    needs: [deploy-frontend, deploy-backend]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
