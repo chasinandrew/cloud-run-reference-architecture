@@ -21,6 +21,7 @@ resource "google_cloud_run_service_iam_member" "frontend_invokes_backend" {
   service  = "backend"
   role     = "roles/run.invoker"
   member   = google_service_account.frontend_service_account.member
+  project = var.project_id
 }
 
 module "backend_cloud_run" {
