@@ -13,6 +13,7 @@ module "frontend_cloud_run" {
 resource "google_service_account" "frontend_service_account" {
   account_id   = "frontend-sa"
   display_name = "Frontend Service Account"
+  project = var.project_id
 }
 
 resource "google_cloud_run_service_iam_member" "frontend_invokes_backend" {
@@ -52,6 +53,7 @@ resource "google_cloud_run_service_iam_policy" "noauth" {
 resource "google_service_account" "backend_service_account" {
   account_id   = "backend-sa"
   display_name = "Backend Service Account"
+  project = var.project_id
 }
 
 
