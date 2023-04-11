@@ -7,7 +7,7 @@ module "frontend_cloud_run" {
   project_id             = var.project_id
   location               = var.region
   image                  = var.frontend_container_image
-  service_account_email = google_service_account.frontend-service_account.email
+  service_account_email = google_service_account.frontend_service_account.email
 }
 
 resource "google_service_account" "frontend_service_account" {
@@ -19,7 +19,7 @@ resource "google_cloud_run_service_iam_member" "frontend_invokes_backend" {
   location = google_cloud_run_service.backend.location
   service  = google_cloud_run_service.backend.name
   role     = "roles/run.invoker"
-  member   = google_service_account.frontend-service_account.member
+  member   = google_service_account.frontend_service_account.member
 }
 
 module "backend_cloud_run" {
@@ -29,7 +29,7 @@ module "backend_cloud_run" {
   project_id             = var.project_id
   location               = var.region
   image                  = var.backend_container_image
-  service_account_email = google_service_account.backend-service_account.email
+  service_account_email = google_service_account.backend_service_account.email
 }
 
 data "google_iam_policy" "noauth" {
