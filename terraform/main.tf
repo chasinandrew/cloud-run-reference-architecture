@@ -8,6 +8,10 @@ module "frontend_cloud_run" {
   location               = var.region
   image                  = var.frontend_container_image
   service_account_email = google_service_account.frontend_service_account.email
+  env_vars = [
+    name = "EDITOR_UPSTREAM_RENDERER_URL"
+    value = module.backend_cloud_run.service_url
+  ]
 }
 
 resource "google_service_account" "frontend_service_account" {
