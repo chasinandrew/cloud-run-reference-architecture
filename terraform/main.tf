@@ -16,8 +16,8 @@ resource "google_service_account" "frontend_service_account" {
 }
 
 resource "google_cloud_run_service_iam_member" "frontend_invokes_backend" {
-  location = google_cloud_run_service.backend.location
-  service  = google_cloud_run_service.backend.name
+  location = backend_cloud_run.location
+  service  = backend_cloud_run.name
   role     = "roles/run.invoker"
   member   = google_service_account.frontend_service_account.member
 }
@@ -43,9 +43,9 @@ data "google_iam_policy" "noauth" {
 }
 
 resource "google_cloud_run_service_iam_policy" "noauth" {
-  location = google_cloud_run_service.backend.location
-  project  = google_cloud_run_service.backend.project
-  service  = google_cloud_run_service.backend.name
+  location = backend_cloud_run.location
+  project  = backend_cloud_run.project
+  service  = backend_cloud_run.name
   policy_data = data.google_iam_policy.noauth.policy_data
 }
  
