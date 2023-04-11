@@ -9,9 +9,9 @@ env:
   GAR_LOCATION: us-east4 # TODO: update Artifact Registry location
   REPOSITORY: reference-architectures # TODO: update Artifact Registry repository name
   BACKEND_SERVICE: backend # TODO: update Cloud Run service name
-  BACKEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Renderer
+  BACKEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
   FRONTEND_SERVICE: frontend # TODO: update Cloud Run service name
-  FRONTEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
+  FRONTEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Renderer
   REGION: us-east4 # TODO: update Cloud Run service region
   IMAGE_TAG: latest
   WORKING_DIRECTORY: ./terraform
