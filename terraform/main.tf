@@ -12,6 +12,9 @@ module "frontend_cloud_run" {
     name = "EDITOR_UPSTREAM_RENDERER_URL"
     value = module.backend_cloud_run.service_url
   ]
+  depends_on = [
+    module.backend_cloud_run
+  ]
 }
 
 resource "google_service_account" "frontend_service_account" {
