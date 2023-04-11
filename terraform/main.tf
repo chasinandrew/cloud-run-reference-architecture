@@ -43,7 +43,7 @@ data "google_iam_policy" "noauth" {
 }
 
 resource "google_cloud_run_service_iam_policy" "noauth" {
-  location = var.location
+  location = var.region
   project  = var.project_id
   service  = "backend"
   policy_data = data.google_iam_policy.noauth.policy_data
