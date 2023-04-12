@@ -1,5 +1,3 @@
-
-
 module "frontend_cloud_run" {
   source  = "./modules/cloud-run"
   # Required variables
