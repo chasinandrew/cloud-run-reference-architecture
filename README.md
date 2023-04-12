@@ -1,4 +1,4 @@
-# Terraform Cloud Run Deployment Pattern
+# Cloud Run Deployment Pattern with Terraform Cloud & GitHub Actions 
 
 This repository handles the basic deployment of containerized application on Cloud Run, along with a Global External Load Balancer and IAM for the service.
 
