@@ -12,7 +12,7 @@ The resources/services/activations/deletions that this module will create/trigge
 * Deployment pipeline facilitates the container image build and push to Artifact Registry
 
 ## Architecture Diagram
-![alt text](./architecture.png "Serverless Web App")
+![alt text](./architecture-diagram.jpg "Serverless Web App")
 
 
 ## Assumptions and Prerequisites 
@@ -67,7 +67,7 @@ This repository assumes that the below mentioned prerequisites are in place befo
   **PROJECT_ID**: Google project ID  
   **WORKLOAD_IDENTITY_PROVIDER**: Do not change this, the secret will be inserted at runtime  
   **SERVICE_ACCOUNT**: Do not change this, the secret will be inserted at runtime  
-  **GAR_LOCATION**: Google Artifact Registry location
+  **GAR_LOCATION**: Google Artifact Registry location  
   **REPOSITORY**: Artifact Registry repository name from preparation step 4  
   **SERVICE**: Name of your service that will be associated with the fully qualified image name   
   **APP_CODE_DIRECTORY**: Root directory of your application code where your Dockerfile is located   
