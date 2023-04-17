@@ -3,16 +3,16 @@ name: Build and Deploy to Cloud Run
 on:
   push:
     branches:
-      - main
+      - feature/declarative-yaml
 env:
-  PROJECT_ID: arched-inkwell-368821 # TODO: update Google Cloud project id
-  GAR_LOCATION: us-east4 # TODO: update Artifact Registry location
-  REPOSITORY: reference-architectures # TODO: update Artifact Registry repository name
-  BACKEND_SERVICE: backend # TODO: update Cloud Run service name
+  PROJECT_ID: arched-inkwell-368821                           # TODO: update Google Cloud project id
+  GAR_LOCATION: us-east4                                      # TODO: update Artifact Registry location
+  REPOSITORY: reference-architectures                         # TODO: update Artifact Registry repository name
+  BACKEND_SERVICE: backend                                    # TODO: update Cloud Run service name
   BACKEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Renderer
-  FRONTEND_SERVICE: frontend # TODO: update Cloud Run service name
+  FRONTEND_SERVICE: frontend                                  # TODO: update Cloud Run service name
   FRONTEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
-  REGION: us-east4 # TODO: update Cloud Run service region
+  REGION: us-east4                                            # TODO: update Cloud Run service region
   IMAGE_TAG: latest
   WORKING_DIRECTORY: ./terraform
 
@@ -49,17 +49,25 @@ jobs:
           password: '${{ steps.auth.outputs.access_token }}'
           registry: '${{ env.GAR_LOCATION }}-docker.pkg.dev'
 
-      - name: Build and Tag
-        id: build-image
-        uses: docker/build-push-action@v3
-        with:
-          context: ${{ env.FRONTEND_DIRECTORY }}
-          push: true 
-          tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}
-      
       - name: Docker Push
         run: |-
+          docker build "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}" ./${{ FRONTEND_DIRECTORY }}
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}"
+
+      - name: Create Service declaration   
+        run: |-
+          export FRONTEND_IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}"
+          export FRONTEND_SERVICE="${{ env.FRONTEND_SERVICE }}"
+          envsubst < frontend_service.yaml > frontend_service.yaml
+      
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v0
+        with:
+          service: ${{ env.FRONTEND_SERVICE }}
+          region: ${{ env.REGION }}
+          metadata: frontend_service.yaml
+
   deploy-backend:
     # Add 'id-token' with the intended permissions for workload identity federation
     permissions:
