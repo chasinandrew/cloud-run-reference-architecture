@@ -14,14 +14,14 @@ spec: #TODO: labels
       serviceAccountName: test #TODO insert sa name 
       containers:
       - image: ${FRONTEND_IMAGE}
-      ports: 
-      - name: http1
-        value: 8080
-      env:
-      - name: PROJECT_ID
-        value: "todo"
-      - name: "EDITOR_UPSTREAM_RENDERER_URL"
-        value: "todo output" #TODO secrets 
+        ports: 
+        - name: http1
+          value: 8080
+        env:
+        - name: PROJECT_ID
+          value: "todo"
+        - name: "EDITOR_UPSTREAM_RENDERER_URL"
+          value: "todo output" #TODO secrets 
 
   traffic:
   - percent: 100
