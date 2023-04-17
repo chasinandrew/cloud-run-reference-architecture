@@ -58,7 +58,7 @@ jobs:
         run: |-
           export FRONTEND_IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}"
           export FRONTEND_SERVICE="${{ env.FRONTEND_SERVICE }}"
-          envsubst < ./.github/workflows/frontend-service.yaml > fe-service.yaml
+          envsubst < frontend-service.yaml > fe-service.yaml
       
       - name: Deploy to Cloud Run
         id: deploy
