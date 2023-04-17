@@ -58,7 +58,7 @@ jobs:
         run: |-
           export FRONTEND_IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}"
           export FRONTEND_SERVICE="${{ env.FRONTEND_SERVICE }}"
-          envsubst < ./.github/workflows/frontend-service.yaml > fe-service.yaml
+          envsubst < ./service-yaml/frontend-service.yaml > fe-service.yaml
       
       - name: Deploy to Cloud Run
         id: deploy
@@ -109,7 +109,7 @@ jobs:
         run: |-
           export BACKEND_IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.BACKEND_SERVICE }}:${{ env.IMAGE_TAG }}"
           export BACKEND_SERVICE="${{ env.BACKEND_SERVICE }}"
-          envsubst < ./.github/workflows/backend-service.yaml > be-service.yaml
+          envsubst < ./service-yaml/backend-service.yaml > be-service.yaml
       
       - name: Deploy to Cloud Run
         id: deploy
