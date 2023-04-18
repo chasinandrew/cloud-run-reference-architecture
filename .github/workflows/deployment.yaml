@@ -18,7 +18,7 @@ env:
 
 jobs:
   deploy-frontend:
-    # Add 'id-token' with the intended permissions for workload identity federation
+    # Add 'id-token' with the intended permissions for workload identity federation#
     permissions:
       contents: 'read'
       id-token: 'write'
