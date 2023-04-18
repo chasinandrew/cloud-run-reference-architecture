@@ -13,9 +13,11 @@ variable "region" {
 variable "frontend_container_image" {
   type = string
   description = "The container image of the frontend Cloud Run instance." 
+  default = ""
 }
 
 variable "backend_container_image" {
   type = string
   description = "The container image of the backend Cloud Run instance." 
+  default = ""
 }
