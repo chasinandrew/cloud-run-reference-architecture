@@ -8,7 +8,7 @@ module "frontend_cloud_run" {
   service_account_email = google_service_account.frontend_service_account.email
   env_vars = [{
     name = "EDITOR_UPSTREAM_RENDERER_URL"
-    value = module.backend_cloud_run.service_url
+    value = ""
   }]
   depends_on = [
     module.backend_cloud_run
