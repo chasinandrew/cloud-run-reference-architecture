@@ -5,7 +5,7 @@ on:
     branches:
       - feature/declarative-yaml
 env:
-  PROJECT_ID: arched-inkwell-368821                           # TODO: update Google Cloud project id
+  PROJECT_ID: sandbox-350815                                  # TODO: update Google Cloud project id
   GAR_LOCATION: us-east4                                      # TODO: update Artifact Registry location
   REPOSITORY: reference-architectures                         # TODO: update Artifact Registry repository name
   BACKEND_SERVICE: backend                                    # TODO: update Cloud Run service name
