@@ -11,7 +11,7 @@ spec:
       containerConcurrency: 80
       containers:
       - image: ${BACKEND_IMAGE}
-              ports: 
+        ports: 
         - name: http1
           containerPort: 8080
         env:
