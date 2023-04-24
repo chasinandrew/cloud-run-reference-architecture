@@ -1,100 +1,153 @@
-resource "google_storage_bucket" "auto-expire" {
-  name          = "no-public-access-bucket"
-  location      = "US"
-
+module "frontend_cloud_run" {
+  source  = "./modules/cloud-run"
+  # Required variables
+  service_name           = "frontend"
+  project_id             = var.project_id
+  location               = var.region
+  image                  = var.frontend_container_image
+  service_account_email = google_service_account.frontend_service_account.email
+  env_vars = [{
+    name = "EDITOR_UPSTREAM_RENDERER_URL"
+    value = ""
+  }]
+  depends_on = [
+    module.backend_cloud_run
+  ]
 }
-# module "frontend_cloud_run" {
-#   source  = "./modules/cloud-run"
-#   # Required variables
-#   service_name           = "frontend"
-#   project_id             = var.project_id
-#   location               = var.region
-#   image                  = var.frontend_container_image
-#   service_account_email = google_service_account.frontend_service_account.email
-#   env_vars = [{
-#     name = "EDITOR_UPSTREAM_RENDERER_URL"
-#     value = ""
-#   }]
+
+resource "google_service_account" "frontend_service_account" {
+  account_id   = "frontend-sa"
+  display_name = "Frontend Service Account"
+  project = var.project_id
+}
+
+resource "google_cloud_run_service_iam_member" "frontend_invokes_backend" {
+  location = var.region
+  service  = "backend"
+  role     = "roles/run.invoker"
+  member   = google_service_account.frontend_service_account.member
+  project = var.project_id
+}
+
+module "backend_cloud_run" {
+  source  = "./modules/cloud-run"
+  # Required variables
+  service_name           = "backend"
+  project_id             = var.project_id
+  location               = var.region
+  image                  = var.backend_container_image
+  service_account_email = google_service_account.backend_service_account.email
+}
+
+data "google_iam_policy" "noauth" {
+  provider = google-beta
+  binding {
+    role = "roles/run.invoker"
+    members = [
+      "allUsers",
+    ]
+  }
+}
+
+resource "google_cloud_run_service_iam_policy" "noauth" {
+  location = var.region
+  project  = var.project_id
+  service  = "frontend"
+  policy_data = data.google_iam_policy.noauth.policy_data
+}
+ 
+resource "google_service_account" "backend_service_account" {
+  account_id   = "backend-sa"
+  display_name = "Backend Service Account"
+  project = var.project_id
+}
+
+###############################################################################
+#                     Workload Identity Pool and Provider                     #
+###############################################################################
+
+resource "google_iam_workload_identity_pool" "tfc-pool" {
+  project                   = module.project.project_id
+  workload_identity_pool_id = var.workload_identity_pool_id
+  display_name              = "TFC Pool"
+  description               = "Identity pool for Terraform Cloud Dynamic Credentials integration"
+}
+
+resource "google_iam_workload_identity_pool_provider" "tfc-pool-provider" {
+  project                            = module.project.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.tfc-pool.workload_identity_pool_id
+  workload_identity_pool_provider_id = var.workload_identity_pool_provider_id
+  display_name                       = "TFC Pool Provider"
+  description                        = "OIDC identity pool provider for Terraform Cloud Dynamic Credentials integration"
+  # Use condition to make sure only token generated for a specific TFC Org can be used across org workspaces
+  attribute_condition = "attribute.terraform_organization_id == \"${var.tfc_organization_id}\""
+  attribute_mapping = {
+    "google.subject"                        = "assertion.sub"
+    "attribute.aud"                         = "assertion.aud"
+    "attribute.terraform_run_phase"         = "assertion.terraform_run_phase"
+    "attribute.terraform_project_id"        = "assertion.terraform_project_id",
+    "attribute.terraform_project_name"      = "assertion.terraform_project_name",
+    "attribute.terraform_workspace_id"      = "assertion.terraform_workspace_id"
+    "attribute.terraform_workspace_name"    = "assertion.terraform_workspace_name"
+    "attribute.terraform_organization_id"   = "assertion.terraform_organization_id"
+    "attribute.terraform_organization_name" = "assertion.terraform_organization_name"
+    "attribute.terraform_run_id"            = "assertion.terraform_run_id"
+    "attribute.terraform_full_workspace"    = "assertion.terraform_full_workspace"
+  }
+  oidc {
+    # Should be different if self hosted TFE instance is used
+    issuer_uri = var.issuer_uri
+  }
+}
+
+###############################################################################
+#                       Service Account and IAM bindings                      #
+###############################################################################
+
+module "sa-tfc" {
+  source     = "../../../../modules/iam-service-account"
+  project_id = module.project.project_id
+  name       = "sa-tfc"
+
+  iam = {
+    # We allow only tokens generated by a specific TFC workspace impersonation of the service account,
+    # that way one identity pool can be used for a TFC Organization, but every workspace will be able to impersonate only a specifc SA
+    "roles/iam.workloadIdentityUser" = ["principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.tfc-pool.name}/attribute.terraform_workspace_id/${var.tfc_workspace_id}"]
+  }
+
+  iam_project_roles = {
+    "${module.project.project_id}" = [
+      "roles/storage.admin"
+    ]
+  }
+}
+# resource "google_sql_database_instance" "main" {
+#   name             = "${var.basename}-db-${random_id.id.hex}"
+#   database_version = "MYSQL_5_7"
+#   region           = var.region
+#   project          = var.project_id
+#   settings {
+#     tier                  = "db-g1-small"
+#     disk_autoresize       = true
+#     disk_autoresize_limit = 0
+#     disk_size             = 10
+#     disk_type             = "PD_SSD"
+#     ip_configuration {
+#       ipv4_enabled    = false
+#       private_network = google_compute_network.main.id
+#     }
+#     location_preference {
+#       zone = var.zone
+#     }
+#   }
+#   deletion_protection = false
 #   depends_on = [
-#     module.backend_cloud_run
+#     google_project_service.all,
+#     google_service_networking_connection.main
 #   ]
-# }
 
-# resource "google_service_account" "frontend_service_account" {
-#   account_id   = "frontend-sa"
-#   display_name = "Frontend Service Account"
-#   project = var.project_id
-# }
-
-# resource "google_cloud_run_service_iam_member" "frontend_invokes_backend" {
-#   location = var.region
-#   service  = "backend"
-#   role     = "roles/run.invoker"
-#   member   = google_service_account.frontend_service_account.member
-#   project = var.project_id
-# }
-
-# module "backend_cloud_run" {
-#   source  = "./modules/cloud-run"
-#   # Required variables
-#   service_name           = "backend"
-#   project_id             = var.project_id
-#   location               = var.region
-#   image                  = var.backend_container_image
-#   service_account_email = google_service_account.backend_service_account.email
-# }
-
-# data "google_iam_policy" "noauth" {
-#   provider = google-beta
-#   binding {
-#     role = "roles/run.invoker"
-#     members = [
-#       "allUsers",
-#     ]
+#   provisioner "local-exec" {
+#     working_dir = "${path.module}/../code/database"
+#     command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
 #   }
 # }
-
-# resource "google_cloud_run_service_iam_policy" "noauth" {
-#   location = var.region
-#   project  = var.project_id
-#   service  = "frontend"
-#   policy_data = data.google_iam_policy.noauth.policy_data
-# }
- 
-# resource "google_service_account" "backend_service_account" {
-#   account_id   = "backend-sa"
-#   display_name = "Backend Service Account"
-#   project = var.project_id
-# }
-
-
-# # resource "google_sql_database_instance" "main" {
-# #   name             = "${var.basename}-db-${random_id.id.hex}"
-# #   database_version = "MYSQL_5_7"
-# #   region           = var.region
-# #   project          = var.project_id
-# #   settings {
-# #     tier                  = "db-g1-small"
-# #     disk_autoresize       = true
-# #     disk_autoresize_limit = 0
-# #     disk_size             = 10
-# #     disk_type             = "PD_SSD"
-# #     ip_configuration {
-# #       ipv4_enabled    = false
-# #       private_network = google_compute_network.main.id
-# #     }
-# #     location_preference {
-# #       zone = var.zone
-# #     }
-# #   }
-# #   deletion_protection = false
-# #   depends_on = [
-# #     google_project_service.all,
-# #     google_service_networking_connection.main
-# #   ]
-
-# #   provisioner "local-exec" {
-# #     working_dir = "${path.module}/../code/database"
-# #     command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
-# #   }
-# # }

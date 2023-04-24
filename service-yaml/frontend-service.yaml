@@ -19,7 +19,7 @@ spec: #TODO: labels
           containerPort: 8080
         env:
         - name: PROJECT_ID
-          value: "todo"
+          value: ${PROJECT_ID}
         - name: "EDITOR_UPSTREAM_RENDERER_URL"
           value: "todo output" #TODO secrets 
 
