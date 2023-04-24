@@ -3,7 +3,7 @@ name: Build and Deploy to Cloud Run
 on:
   push:
     branches:
-      - main
+      - feature/parity-with-remote
 env:
   PROJECT_ID: arched-inkwell-368821 # TODO: update Google Cloud project id
   GAR_LOCATION: us-east4 # TODO: update Artifact Registry location

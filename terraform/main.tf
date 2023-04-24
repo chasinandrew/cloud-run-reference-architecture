@@ -7,12 +7,31 @@ module "frontend_cloud_run" {
   image                  = var.frontend_container_image
   service_account_email = google_service_account.frontend_service_account.email
   env_vars = [
+    {
     name = "EDITOR_UPSTREAM_RENDERER_URL"
     value = module.backend_cloud_run.service_url
+    }
   ]
   depends_on = [
     module.backend_cloud_run
   ]
+}
+
+
+module "backend_cloud_run" {
+  source  = "./modules/cloud-run"
+  # Required variables
+  service_name           = "backend"
+  project_id             = var.project_id
+  location               = var.region
+  image                  = var.backend_container_image
+  service_account_email = google_service_account.backend_service_account.email
+}
+
+resource "google_tags_location_tag_binding" "binding" {
+    parent = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/frontend"
+    tag_value = "tagValues/1067211650924"
+    location = var.region
 }
 
 resource "google_service_account" "frontend_service_account" {
@@ -29,15 +48,6 @@ resource "google_cloud_run_service_iam_member" "frontend_invokes_backend" {
   project = var.project_id
 }
 
-module "backend_cloud_run" {
-  source  = "./modules/cloud-run"
-  # Required variables
-  service_name           = "backend"
-  project_id             = var.project_id
-  location               = var.region
-  image                  = var.backend_container_image
-  service_account_email = google_service_account.backend_service_account.email
-}
 
 data "google_iam_policy" "noauth" {
   provider = google-beta
