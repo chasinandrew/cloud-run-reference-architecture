@@ -9,7 +9,7 @@ module "frontend_cloud_run" {
   env_vars = [
     {
     name = "EDITOR_UPSTREAM_RENDERER_URL"
-    value = module.backend_cloud_run.service_url
+    value = ""#module.backend_cloud_run.service_url
     }
   ]
   depends_on = [
