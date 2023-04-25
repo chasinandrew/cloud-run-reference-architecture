@@ -29,7 +29,7 @@ module "backend_cloud_run" {
 }
 
 resource "google_tags_location_tag_binding" "binding" {
-    parent = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/frontend"
+    parent = "//run.googleapis.com/projects/823495727548/locations/${var.region}/services/frontend"
     tag_value = "tagValues/1067211650924"
     location = var.region
 }
