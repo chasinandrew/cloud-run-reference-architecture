@@ -107,7 +107,7 @@ jobs:
 
   terraform: 
     name: "Terraform"
-    needs: [deploy-frontend, deploy-backend]
+    # needs: [deploy-frontend, deploy-backend]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -137,7 +137,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false -var-file=dev.tfvars -var='frontend_container_image=${{ needs.deploy-backend.outputs.backend-image }}' -var='backend_container_image=${{ needs.deploy-frontend.outputs.frontend-image}}'
+        run: terraform plan -no-color -input=false -var-file=dev.tfvars
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Terraform Plan Status
@@ -146,6 +146,6 @@ jobs:
 
       - name: Terraform Apply
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=dev.tfvars -var='frontend_container_image=${{ needs.deploy-frontend.outputs.frontend-image }}' -var='backend_container_image=${{ needs.deploy-backend.outputs.backend-image}}'
+        run: terraform apply -auto-approve -input=false -var-file=dev.tfvars
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
