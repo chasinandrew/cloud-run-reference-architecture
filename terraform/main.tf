@@ -28,11 +28,11 @@ module "backend_cloud_run" {
   service_account_email = google_service_account.backend_service_account.email
 }
 
-# resource "google_tags_location_tag_binding" "binding" {
-#     parent = "//run.googleapis.com/projects/823495727548/locations/${var.region}/services/frontend"
-#     tag_value = "tagValues/1067211650924"
-#     location = var.region
-# }
+resource "google_tags_location_tag_binding" "binding" {
+    parent = "//run.googleapis.com/projects/823495727548/locations/${var.region}/services/frontend"
+    tag_value = "tagValues/1067211650924"
+    location = var.region
+}
 
 resource "google_service_account" "frontend_service_account" {
   account_id   = "frontend-sa"
