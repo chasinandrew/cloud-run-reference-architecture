@@ -78,6 +78,7 @@ module "mssql" {
   project_id = var.project_id
   name = "mssql"
   region = var.region
+  zone = "us-east4-a"
 }
 
 #   provisioner "local-exec" {
