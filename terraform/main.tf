@@ -92,4 +92,4 @@ resource "google_service_account" "backend_service_account" {
 #     working_dir = "${path.module}/../code/database"
 #     command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
 #   }
-# }
+# }#
