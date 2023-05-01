@@ -15,7 +15,16 @@ variable "frontend_container_image" {
   description = "The container image of the frontend Cloud Run instance." 
 }
 
+variable "frontend_service_name" {
+  type = string
+  description = "The service name of the frontend Cloud Run instance." 
+}
+
 variable "backend_container_image" {
   type = string
   description = "The container image of the backend Cloud Run instance." 
+}
+variable "backend_service_name" {
+  type = string
+  description = "The service name of the backend Cloud Run instance." 
 }
