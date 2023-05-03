@@ -1,12 +1,15 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
+  annotations: 
+    run.googleapis.com/launch-stage: ALPHA 
   name: ${FRONTEND_SERVICE}
 spec: #TODO: labels
   template:
     metadata:
       name: ${FRONTEND_SERVICE}-yellow #TODO: change naming 
       annotations:
+        run.googleapis.com/execution-environment: gen1
         autoscaling.knative.dev/minScale: '3'
         autoscaling.knative.dev/maxScale: '100'
     spec:
