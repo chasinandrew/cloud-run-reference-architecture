@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -71,6 +73,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
+          # terraform_version: 1.4.2
           cli_config_credentials_token: ${{ secrets.TF_API_KEY }}
 
       - name: Terraform Format
@@ -100,3 +103,11 @@ jobs:
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false -var-file=dev.tfvars
         working-directory: ${{ env.WORKING_DIRECTORY }}
+        # id: deploy
+        # uses: google-github-actions/deploy-cloudrun@v0
+        # with:
+        #   service: ${{ env.FRONTEND_SERVICE }}
+        #   region: ${{ env.REGION }}
+        #   metadata: container.yaml
+
+
