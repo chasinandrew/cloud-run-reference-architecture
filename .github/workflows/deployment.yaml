@@ -25,45 +25,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          # terraform_version: 1.4.2
-          cli_config_credentials_token: ${{ secrets.TF_API_KEY }}
-
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt 
-
-      - name: Terraform Init
-        id: init
-        run: terraform init
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-      
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color -input=false -var-file=dev.tfvars
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      - name: Terraform Apply
-        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=dev.tfvars
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-      
-      - name: Terraform Output
-        run: |-
-          export SERVICE_ACCOUNT_NAME=${terraform output service_account_name}
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
       - name: Google Auth
         id: auth
         uses: 'google-github-actions/auth@v0'
@@ -106,11 +67,36 @@ jobs:
       - name: Deploy to Cloud Run
         run: |- 
           gcloud run services replace container.yaml --region=${{ env.REGION }}
-        # id: deploy
-        # uses: google-github-actions/deploy-cloudrun@v0
-        # with:
-        #   service: ${{ env.FRONTEND_SERVICE }}
-        #   region: ${{ env.REGION }}
-        #   metadata: container.yaml
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_KEY }}
 
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt 
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false -var-file=dev.tfvars
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=dev.tfvars
+        working-directory: ${{ env.WORKING_DIRECTORY }}
