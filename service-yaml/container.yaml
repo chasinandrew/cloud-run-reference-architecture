@@ -3,7 +3,7 @@ kind: Service
 metadata:
   annotations: 
     run.googleapis.com/launch-stage: ALPHA
-      run.googleapis.com/ingress: internal-and-cloud-load-balancing 
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing 
   name: ${FRONTEND_SERVICE}
 spec: #TODO: labels
   template:
