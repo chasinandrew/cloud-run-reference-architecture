@@ -4,6 +4,10 @@ variable "project_id" {
   description = "The GCP project id to create Terraform resources within."
 }
 
+variable "first_run" {
+  type = boolean
+  description = "Specifies whether this is the first run of the module. A Cloud Run instance must be created first before  "
+}
 
 variable "region" {
   type        = string

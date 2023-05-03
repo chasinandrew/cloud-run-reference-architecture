@@ -2,7 +2,7 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-data "google_cloud_run_service" "cloud_run" {
+data "google_cloud_run_service" "container" {
   project = var.project_id
   name = var.frontend_service_name
   location = var.region
@@ -26,7 +26,6 @@ resource "google_project_iam_member" "object_creator" {
     member = google_service_account.container_service_account.member
 }
 
-
 resource "google_project_iam_member" "cloudsql_client" {
     project = var.project_id
     role = "roles/cloudsql.client"
@@ -35,9 +34,13 @@ resource "google_project_iam_member" "cloudsql_client" {
 
 
 resource "google_tags_location_tag_binding" "binding" {
+  count = var.first_run ? 0 : 1 
   parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/${var.frontend_service_name}"
   tag_value = "tagValues/1067211650924"
   location  = var.region
+  depends_on = [
+    data.google_cloud_run_service.container
+  ]
 }
 
 data "google_iam_policy" "noauth" {
@@ -51,28 +54,14 @@ data "google_iam_policy" "noauth" {
 }
 
 
-module "mssql_db" {
-  source     = "./modules/mssql"
-  project_id = var.project_id
-  name       = "mssql"
-  region     = var.region
-  zone       = "us-east4-a"
-
-  # provisioner "local-exec" {
-  #   working_dir = "${path.module}/../code/database"
-  #   command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
-  # }
-}
-
-
-
 resource "google_cloud_run_service_iam_policy" "noauth" {
+  count = var.first_run ? 0 : 1 
   location    = var.region
   project     = var.project_id
   service     = var.frontend_service_name
   policy_data = data.google_iam_policy.noauth.policy_data
   depends_on = [
-    data.google_cloud_run_service.cloud_run
+    data.google_cloud_run_service.container
   ]
 }
 
@@ -82,17 +71,22 @@ resource "random_integer" "sneg_id" {
 }
 
 resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
+  count = var.first_run ? 0 : 1 
   name                  = format("sneg-%s", random_integer.sneg_id.result)
   project = var.project_id
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
-    service = data.google_cloud_run_service.cloud_run.name
+    service = data.google_cloud_run_service.container.name
   }
-  depends_on = [random_integer.sneg_id]
+  depends_on = [
+    random_integer.sneg_id, 
+    data.google_cloud_run_service.container
+    ]
 }
 
 module "external-lb-https" {
+  count = var.first_run ? 0 : 1 
   source     = "./modules/external-lb"
   project = var.project_id
   # labels     = local.labels
@@ -131,6 +125,18 @@ module "external-lb-https" {
   depends_on                      = [google_compute_region_network_endpoint_group.cloudrun_sneg]
 }
 
+module "mssql_db" {
+  source     = "./modules/mssql"
+  project_id = var.project_id
+  name       = "mssql"
+  region     = var.region
+  zone       = "us-east4-a"
+
+  # provisioner "local-exec" {
+  #   working_dir = "${path.module}/../code/database"
+  #   command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
+  # }
+}
 
 
 # resource "google_secret_manager_secret" "sqluser" {
