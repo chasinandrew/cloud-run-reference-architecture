@@ -7,7 +7,7 @@ metadata:
 spec: #TODO: labels
   template:
     metadata:
-      name: ${FRONTEND_SERVICE}-purple #TODO: change naming 
+      name: ${FRONTEND_SERVICE}-${REVISION_TAG} #TODO: change naming 
       annotations:
         run.googleapis.com/execution-environment: gen1
         autoscaling.knative.dev/minScale: '3'
