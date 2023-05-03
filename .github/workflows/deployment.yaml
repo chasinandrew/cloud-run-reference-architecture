@@ -68,7 +68,7 @@ jobs:
         
       - name: Deploy to Cloud Run
         run: |- 
-          gcloud run services replace container.yaml
+          gcloud run services replace container.yaml --region=${{ env.REGION }}
         # id: deploy
         # uses: google-github-actions/deploy-cloudrun@v0
         # with:
