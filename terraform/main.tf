@@ -88,9 +88,6 @@ resource "google_tags_location_tag_binding" "binding" {
   parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/${var.frontend_service_name}"
   tag_value = "tagValues/1067211650924"
   location  = var.region
-  depends_on = [
-    google_tags_tag_value_iam_member.binding
-  ]
 }
 
 data "google_iam_policy" "noauth" {
