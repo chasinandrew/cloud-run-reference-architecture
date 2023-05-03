@@ -67,12 +67,14 @@ jobs:
           envsubst < ./service-yaml/container.yaml > container.yaml
         
       - name: Deploy to Cloud Run
-        id: deploy
-        uses: google-github-actions/deploy-cloudrun@v0
-        with:
-          service: ${{ env.FRONTEND_SERVICE }}
-          region: ${{ env.REGION }}
-          metadata: container.yaml
+        run: |- 
+          gcloud run services replace container.yaml
+        # id: deploy
+        # uses: google-github-actions/deploy-cloudrun@v0
+        # with:
+        #   service: ${{ env.FRONTEND_SERVICE }}
+        #   region: ${{ env.REGION }}
+        #   metadata: container.yaml
 
   terraform: 
     name: "Terraform"
