@@ -5,7 +5,7 @@ metadata:
 spec: #TODO: labels
   template:
     metadata:
-      name: ${FRONTEND_SERVICE}-blue #TODO: change naming 
+      name: ${FRONTEND_SERVICE}-yellow #TODO: change naming 
       annotations:
         autoscaling.knative.dev/minScale: '3'
         autoscaling.knative.dev/maxScale: '100'
