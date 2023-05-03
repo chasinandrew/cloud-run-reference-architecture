@@ -15,7 +15,7 @@ env:
   WORKING_DIRECTORY: ./terraform
 
 jobs:
- terraform-bootstrap: 
+  terraform-bootstrap: 
     name: "Terraform"
     runs-on: ubuntu-latest
     permissions:
