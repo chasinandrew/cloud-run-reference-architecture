@@ -3,6 +3,7 @@ data "google_project" "project" {
 }
 
 data "google_cloud_run_service" "cloud_run" {
+  project = var.project_id
   name = var.frontend_service_name
   location = var.region
 }
