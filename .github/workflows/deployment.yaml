@@ -13,7 +13,7 @@ env:
   REGION: us-east4 # TODO: update Cloud Run service region
   IMAGE_TAG: latest
   WORKING_DIRECTORY: ./terraform
-  CLOUD_RUN_SA: cloud-run-sa@arched-inkwell-368821.iam.gserviceaccount.com	
+  CLOUD_RUN_SA: cloud-run-sa
 
 jobs:
   deploy: 

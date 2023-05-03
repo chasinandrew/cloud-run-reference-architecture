@@ -9,7 +9,6 @@ data "google_cloud_run_service" "container" {
 }
 
 resource "google_tags_location_tag_binding" "binding" {
-  count     = var.first_run ? 0 : 1
   parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/${var.frontend_service_name}"
   tag_value = "tagValues/1067211650924"
   location  = var.region
@@ -79,7 +78,7 @@ module "external-lb-https" {
 
       groups = [
         {
-          group = google_compute_region_network_endpoint_group.cloudrun_sneg[0].id
+          group = google_compute_region_network_endpoint_group.cloudrun_sneg.id
         }
       ]
 
