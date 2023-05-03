@@ -3,6 +3,7 @@ kind: Service
 metadata:
   annotations: 
     run.googleapis.com/launch-stage: ALPHA
+      run.googleapis.com/ingress: internal-and-cloud-load-balancing 
   name: ${FRONTEND_SERVICE}
 spec: #TODO: labels
   template:
@@ -10,7 +11,6 @@ spec: #TODO: labels
       name: ${FRONTEND_SERVICE}-${REVISION_TAG} 
       annotations:
         run.googleapis.com/execution-environment: gen1
-        run.googleapis.com/ingress: internal-and-cloud-load-balancing 
         autoscaling.knative.dev/minScale: '3'
         autoscaling.knative.dev/maxScale: '100'
     spec:
@@ -30,7 +30,7 @@ spec: #TODO: labels
         - name: DB_NAME
           value: "todo"
         - name: DB_PORT
-          value: 1433
+          value: "1433"
         - name: DB_USER
           value: "todo"
   traffic:
