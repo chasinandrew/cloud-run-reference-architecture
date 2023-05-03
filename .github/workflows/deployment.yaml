@@ -13,6 +13,7 @@ env:
   REGION: us-east4 # TODO: update Cloud Run service region
   IMAGE_TAG: latest
   WORKING_DIRECTORY: ./terraform
+  CLOUD_RUN_SA: cloud-run-sa@arched-inkwell-368821.iam.gserviceaccount.com	
 
 jobs:
   deploy: 
@@ -99,6 +100,7 @@ jobs:
           export FRONTEND_SERVICE="${{ env.FRONTEND_SERVICE }}"
           export PROJECT_ID="${{ env.PROJECT_ID }}"
           export REVISION_TAG=${{ github.sha }}
+          export CLOUD_RUN_SA=${{ env.CLOUD_RUN_SA }}
           envsubst < ./service-yaml/container.yaml > container.yaml
         
       - name: Deploy to Cloud Run

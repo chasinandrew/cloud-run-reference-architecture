@@ -15,7 +15,7 @@ spec: #TODO: labels
         autoscaling.knative.dev/maxScale: '100'
     spec:
       containerConcurrency: 80
-      serviceAccountName: ${SERVICE_ACCOUNT_NAME} #TODO insert sa name 
+      serviceAccountName: ${CLOUD_RUN_SA} #TODO insert sa name 
       containers:
       - image: ${FRONTEND_IMAGE}
         name: frontend
