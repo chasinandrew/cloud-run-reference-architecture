@@ -17,7 +17,7 @@ spec: #TODO: labels
       # serviceAccountName: test #TODO insert sa name 
       containers:
       - image: ${FRONTEND_IMAGE}
-        name: FRONTEND
+        name: frontend
         ports: 
         - name: http1
           containerPort: 8080
