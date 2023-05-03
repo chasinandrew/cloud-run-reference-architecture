@@ -61,21 +61,22 @@ jobs:
 
     # END - Docker auth and build
   deploy-cloud-run: 
-      - name: Create Service declaration   
-        run: |-
-          export FRONTEND_IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}"
-          export FRONTEND_IMAGE="${{ env.FRONTEND_SERVICE }}"
-          export PROJECT_ID="${{ env.PROJECT_ID }}"
-          envsubst < ./service-yaml/container.yaml > container.yaml
-      
-      - name: Deploy to Cloud Run
-        id: deploy
-        uses: google-github-actions/deploy-cloudrun@v0
-        with:
-          service: ${{ env.FRONTEND_SERVICE }}
-          region: ${{ env.REGION }}
-          metadata: container.yaml
-      # END - Docker auth and build
+      runs-on: ubuntu-latest
+      steps: 
+        - name: Create Service declaration   
+          run: |-
+            export FRONTEND_IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}"
+            export FRONTEND_IMAGE="${{ env.FRONTEND_SERVICE }}"
+            export PROJECT_ID="${{ env.PROJECT_ID }}"
+            envsubst < ./service-yaml/container.yaml > container.yaml
+        
+        - name: Deploy to Cloud Run
+          id: deploy
+          uses: google-github-actions/deploy-cloudrun@v0
+          with:
+            service: ${{ env.FRONTEND_SERVICE }}
+            region: ${{ env.REGION }}
+            metadata: container.yaml
 
   terraform: 
     name: "Terraform"
