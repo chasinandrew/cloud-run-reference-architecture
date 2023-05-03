@@ -3,8 +3,8 @@ data "google_project" "project" {
 }
 
 data "google_cloud_run_service" "container" {
-  project = var.project_id
-  name = var.frontend_service_name
+  project  = var.project_id
+  name     = var.frontend_service_name
   location = var.region
 }
 
@@ -15,26 +15,26 @@ resource "google_service_account" "container_service_account" {
 }
 
 resource "google_project_iam_member" "secret_access" {
-    project = var.project_id
-    role = "roles/secretmanager.secretAccessor"
-    member = google_service_account.container_service_account.member
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = google_service_account.container_service_account.member
 }
 
-resource "google_project_iam_member" "object_creator" { 
-    project = var.project_id
-    role = "roles/storage.objectCreator"
-    member = google_service_account.container_service_account.member
+resource "google_project_iam_member" "object_creator" {
+  project = var.project_id
+  role    = "roles/storage.objectCreator"
+  member  = google_service_account.container_service_account.member
 }
 
 resource "google_project_iam_member" "cloudsql_client" {
-    project = var.project_id
-    role = "roles/cloudsql.client"
-    member = google_service_account.container_service_account.member
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = google_service_account.container_service_account.member
 }
 
 
 resource "google_tags_location_tag_binding" "binding" {
-  count = var.first_run ? 0 : 1 
+  count     = var.first_run ? 0 : 1
   parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/${var.frontend_service_name}"
   tag_value = "tagValues/1067211650924"
   location  = var.region
@@ -55,7 +55,7 @@ data "google_iam_policy" "noauth" {
 
 
 resource "google_cloud_run_service_iam_policy" "noauth" {
-  count = var.first_run ? 0 : 1 
+  count       = var.first_run ? 0 : 1
   location    = var.region
   project     = var.project_id
   service     = var.frontend_service_name
@@ -71,26 +71,26 @@ resource "random_integer" "sneg_id" {
 }
 
 resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
-  count = var.first_run ? 0 : 1 
+  count                 = var.first_run ? 0 : 1
   name                  = format("sneg-%s", random_integer.sneg_id.result)
-  project = var.project_id
+  project               = var.project_id
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
     service = data.google_cloud_run_service.container.name
   }
   depends_on = [
-    random_integer.sneg_id, 
+    random_integer.sneg_id,
     data.google_cloud_run_service.container
-    ]
+  ]
 }
 
 module "external-lb-https" {
-  count = var.first_run ? 0 : 1 
-  source     = "./modules/external-lb"
+  count   = var.first_run ? 0 : 1
+  source  = "./modules/external-lb"
   project = var.project_id
   # labels     = local.labels
-  name       = format("https-lb-%s", random_integer.sneg_id.result)
+  name = format("https-lb-%s", random_integer.sneg_id.result)
   backends = {
     default = {
       description             = null
