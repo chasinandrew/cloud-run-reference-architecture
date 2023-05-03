@@ -62,7 +62,7 @@ jobs:
       - name: Create Service declaration   
         run: |-
           export FRONTEND_IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}"
-          export FRONTEND_IMAGE="${{ env.FRONTEND_SERVICE }}"
+          export FRONTEND_SERVICE="${{ env.FRONTEND_SERVICE }}"
           export PROJECT_ID="${{ env.PROJECT_ID }}"
           envsubst < ./service-yaml/container.yaml > container.yaml
         
