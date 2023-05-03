@@ -16,7 +16,7 @@ env:
 
 jobs:
   deploy: 
-    name: "Terraform"
+    name: "Deploy Terraform Resources and Cloud Run with Declarative Service YAML"
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
