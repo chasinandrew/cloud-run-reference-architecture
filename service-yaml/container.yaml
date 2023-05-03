@@ -17,6 +17,7 @@ spec: #TODO: labels
         ports: 
         - name: http1
           containerPort: 8080
+      - image: "gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.2.0" 
         env:
         - name: PROJECT_ID
           value: ${PROJECT_ID}
