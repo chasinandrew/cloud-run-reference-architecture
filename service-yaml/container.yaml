@@ -2,12 +2,13 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   annotations: 
-    run.googleapis.com/launch-stage: ALPHA 
+    run.googleapis.com/launch-stage: ALPHA
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing 
   name: ${FRONTEND_SERVICE}
 spec: #TODO: labels
   template:
     metadata:
-      name: ${FRONTEND_SERVICE}-${REVISION_TAG} #TODO: change naming 
+      name: ${FRONTEND_SERVICE}-${REVISION_TAG} 
       annotations:
         run.googleapis.com/execution-environment: gen1
         autoscaling.knative.dev/minScale: '3'
@@ -24,7 +25,14 @@ spec: #TODO: labels
         env:
         - name: PROJECT_ID
           value: ${PROJECT_ID}
-
+        - name: INSTANCE_CONNECTION_NAME
+          value: "todo"
+        - name: DB_NAME
+          value: "todo"
+        - name: DB_PORT
+          value: 1433
+        - name: DB_USER
+          value: "todo"
   traffic:
   - percent: 100
     latestRevision: true
