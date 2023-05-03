@@ -11,5 +11,5 @@ terraform {
     workspaces {
       name = "cloud-run-reference-architecture"
     }
-  }#
+  } #
 }

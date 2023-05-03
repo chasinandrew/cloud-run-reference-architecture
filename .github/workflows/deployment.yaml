@@ -8,8 +8,6 @@ env:
   PROJECT_ID: arched-inkwell-368821 # TODO: update Google Cloud project id
   GAR_LOCATION: us-east4 # TODO: update Artifact Registry location
   REPOSITORY: reference-architectures # TODO: update Artifact Registry repository name
-  BACKEND_SERVICE: backend # TODO: update Cloud Run service name
-  BACKEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Renderer
   FRONTEND_SERVICE: frontend # TODO: update Cloud Run service name
   FRONTEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
   REGION: us-east4 # TODO: update Cloud Run service region
@@ -145,7 +143,7 @@ jobs:
         run: exit 1
 
       - name: Terraform Apply
-        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false -var-file=dev.tfvars
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
