@@ -15,6 +15,49 @@ env:
   WORKING_DIRECTORY: ./terraform
 
 jobs:
+ terraform-bootstrap: 
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_KEY }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt 
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color -target="module.container_service_account"
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false -var-file=dev.tfvars -target="module.container_service_account"
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=dev.tfvars -target="module.container_service_account"
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+
   deploy-frontend:
     # Add 'id-token' with the intended permissions for workload identity federation
     permissions:
@@ -77,7 +120,7 @@ jobs:
         #   region: ${{ env.REGION }}
         #   metadata: container.yaml
 
-  terraform: 
+  terraform-lb: 
     name: "Terraform"
     needs: [deploy-frontend]
     runs-on: ubuntu-latest

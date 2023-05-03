@@ -8,83 +8,9 @@ data "google_cloud_run_service" "cloud_run" {
   location = var.region
 }
 
-# resource "google_cloud_run_service" "frontend_container" {
-#   name     = var.frontend_service_name
-#   location = var.region
-#   project = var.project_id
-
-#   metadata {
-#     # labels = module.tagging.labels
-#     annotations = {
-#       "run.googleapis.com/ingress" = "internal-and-cloud-load-balancing" #ocal.cloud_run.ingress_service_annotation
-#     }
-#   }
-
-#   template {
-#     spec {
-#       service_account_name = google_service_account.frontend_service_account.email
-#       containers {
-#         image = var.frontend_container_image
-#         ports {
-#           name           = "http1" #local.cloud_run.http_framing_layer
-#           container_port = 80 #local.cloud_run.port
-#         }
-#         env {
-#           name  = "PROJECT_ID"
-#           value = var.project_id
-#         }
-#         env {
-#           name  = "INSTANCE_CONNECTION_NAME"
-#           value = module.mssql_db.instance_connection_name
-#         }
-#         env {
-#           name  = "DB_NAME"
-#           value = module.mssql_db.instance_name
-#         }
-#         env {
-#           name  = "DB_PORT"
-#           value = 1433
-#         }
-#         env {
-#           name  = "DB_USER"
-#           value = "default"
-#         }
-#         env {
-#           name  = "DB_PASSWORD"
-#           value = ""
-#         }
-#       }
-#     }
-#     metadata {
-#       annotations = {
-#         "autoscaling.knative.dev/maxScale" = "1000"
-#         "autoscaling.knative.dev/minScale" = "3"
-#       }
-#     }
-#   }
-
-#   traffic {
-#     percent         = 100
-#     latest_revision = true
-#   }
-#   lifecycle {
-#     ignore_changes = [
-#       metadata[0].annotations["run.googleapis.com/client-name"],
-#       metadata[0].annotations["run.googleapis.com/operation-id"],
-#       template[0].spec[0].containers[0].image,
-#       template[0].metadata[0].annotations["run.googleapis.com/client-name"],
-#       template[0].metadata[0].annotations["client.knative.dev/user-image"],
-#     ]
-#   }
-#   depends_on = [
-#     google_service_account.frontend_service_account,
-#   ]
-# }
-
-resource "google_service_account" "frontend_service_account" {
-  account_id   = "frontend-sa"
-  display_name = "Frontend Service Account"
-  project      = var.project_id
+module "container_service_account" { 
+  source = "./modules/cloud-run-sa"
+  project_id = var.project_id
 }
 
 
