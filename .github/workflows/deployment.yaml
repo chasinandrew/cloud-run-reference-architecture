@@ -76,7 +76,7 @@ jobs:
 
   terraform: 
     name: "Terraform"
-    needs: [deploy-frontend,deploy-cloud-run]
+    needs: [deploy-frontend]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
