@@ -24,8 +24,6 @@ spec: #TODO: labels
         env:
         - name: PROJECT_ID
           value: ${PROJECT_ID}
-        - name: "EDITOR_UPSTREAM_RENDERER_URL"
-          value: "todo output" #TODO secrets 
 
   traffic:
   - percent: 100

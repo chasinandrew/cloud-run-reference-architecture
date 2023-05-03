@@ -140,7 +140,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
-    service = google_cloud_run_service.frontend_container.name
+    service = data.google_cloud_run_service.cloud_run
   }
   depends_on = [random_integer.sneg_id]
 }
