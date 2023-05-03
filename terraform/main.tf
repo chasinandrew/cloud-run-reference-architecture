@@ -1,4 +1,3 @@
-
 data "google_project" "project" {
   project_id = var.project_id
 }
@@ -107,14 +106,13 @@ module "mssql_db" {
   name       = "mssql"
   region     = var.region
   zone       = "us-east4-a"
+
+  provisioner "local-exec" {
+    working_dir = "${path.module}/../code/database"
+    command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
+  }
 }
 
-#   provisioner "local-exec" {
-#     working_dir = "${path.module}/../code/database"
-#     command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
-#   }
-# }
-#
 
 
 resource "google_cloud_run_service_iam_policy" "noauth" {
