@@ -7,6 +7,7 @@ data "google_project" "project" {
 resource "google_cloud_run_service" "frontend_container" {
   name     = var.frontend_service_name
   location = var.region
+  project = var.project_id
 
   metadata {
     # labels = module.tagging.labels
