@@ -92,13 +92,6 @@ resource "google_tags_location_tag_binding" "binding" {
   ]
 }
 
-resource "google_tags_tag_value_iam_member" "binding" {
-  role      = "roles/resourcemanager.tagUser"
-  tag_value = "tagValues/1067211650924"
-  member    = "serviceAccount:terraform@arched-inkwell-368821.iam.gserviceaccount.com"
-}
-
-
 data "google_iam_policy" "noauth" {
   provider = google-beta
   binding {
