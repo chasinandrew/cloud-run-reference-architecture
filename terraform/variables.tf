@@ -6,7 +6,7 @@ variable "project_id" {
 
 variable "first_run" {
   type        = bool
-  description = "Specifies whether this is the first run of the module. A Cloud Run instance must be created first before  "
+  description = "Specifies whether this is the first run of the module. A Cloud Run instance must be created first before pulling data source."
 }
 
 variable "region" {
