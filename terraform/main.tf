@@ -108,7 +108,7 @@ module "external-lb-https" {
 
       groups = [
         {
-          group = google_compute_region_network_endpoint_group.cloudrun_sneg.id
+          group = google_compute_region_network_endpoint_group.cloudrun_sneg.id[0]
         }
       ]
 
