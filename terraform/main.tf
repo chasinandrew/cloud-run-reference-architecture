@@ -107,10 +107,10 @@ module "mssql_db" {
   region     = var.region
   zone       = "us-east4-a"
 
-  provisioner "local-exec" {
-    working_dir = "${path.module}/../code/database"
-    command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
-  }
+  # provisioner "local-exec" {
+  #   working_dir = "${path.module}/../code/database"
+  #   command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
+  # }
 }
 
 
