@@ -18,7 +18,7 @@ spec: #TODO: labels
       serviceAccountName: ${CLOUD_RUN_SA}
       containers:
       - image: ${CONTAINER_IMAGE}
-        name: CONTAINER
+        name: ${CONTAINER_SERVICE}
         ports: 
         - name: http1
           containerPort: 8080
