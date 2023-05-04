@@ -29,7 +29,7 @@ jobs:
 
       - name: Deploy to Cloud Run #TODO: replace with dummy container 
         run: |- 
-          gcloud run deploy ${{ env.CONTAINER_SERVICE}} --image us-docker.pkg.dev/cloudrun/container/hello:latest
+          gcloud run deploy ${{ env.CONTAINER_SERVICE}} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ env.PROJECT_ID }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
