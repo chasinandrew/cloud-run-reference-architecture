@@ -4,11 +4,11 @@ metadata:
   annotations: 
     run.googleapis.com/launch-stage: ALPHA
     run.googleapis.com/ingress: internal-and-cloud-load-balancing 
-  name: ${FRONTEND_SERVICE}
+  name: ${CONTAINER_SERVICE}
 spec: #TODO: labels
   template:
     metadata:
-      name: ${FRONTEND_SERVICE}-${REVISION_TAG} 
+      name: ${CONTAINER_SERVICE}-${REVISION_TAG} 
       annotations:
         run.googleapis.com/execution-environment: gen1
         autoscaling.knative.dev/minScale: '3'
@@ -17,11 +17,12 @@ spec: #TODO: labels
       containerConcurrency: 80
       serviceAccountName: ${CLOUD_RUN_SA}
       containers:
-      - image: ${FRONTEND_IMAGE}
-        name: frontend
+      - image: ${CONTAINER_IMAGE}
+        name: CONTAINER
         ports: 
         - name: http1
           containerPort: 8080
+      - image: #cloud sql 
         env:
         - name: PROJECT_ID
           value: ${PROJECT_ID}
