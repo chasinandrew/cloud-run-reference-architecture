@@ -35,7 +35,7 @@ jobs:
           workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
           service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
-      #TODO: REMOVE AFTER FIRST RUN
+      #TODO: REMOVE AFTER FIRST RUN #
       - name: Deploy to Cloud Run 
         run: |- 
           gcloud run deploy ${{ env.CONTAINER_SERVICE}} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
