@@ -22,7 +22,6 @@ spec: #TODO: labels
         ports: 
         - name: http1
           containerPort: 8080
-      - image: #cloud sql 
         env:
         - name: PROJECT_ID
           value: ${PROJECT_ID}
