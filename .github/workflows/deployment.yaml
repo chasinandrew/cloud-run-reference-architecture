@@ -8,7 +8,7 @@ env:
   PROJECT_ID: arched-inkwell-368821 # TODO: update Google Cloud project id
   GAR_LOCATION: us-east4 # TODO: update Artifact Registry location
   REPOSITORY: reference-architectures # TODO: update Artifact Registry repository name
-  CONTAINER_SERVICE: CONTAINER # TODO: update Cloud Run service name
+  CONTAINER_SERVICE: pods-app # TODO: update Cloud Run service name
   CONTAINER_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
   REGION: us-east4 # TODO: update Cloud Run service region
   IMAGE_TAG: latest
