@@ -82,7 +82,7 @@ jobs:
     needs: [terraform]
     permissions:
       pull-requests: write
-      id-token: read
+      id-token: write
       contents: read
     steps:
       - name: Checkout
