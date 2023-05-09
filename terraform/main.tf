@@ -183,5 +183,5 @@ resource "google_pubsub_topic_iam_member" "member" {
 resource "google_project_service_identity" "sm_sa" {
   provider = google-beta
   project = data.google_project.project.project_id
-  service = "secretsmanager.googleapis.com"
+  service = "secretmanager.googleapis.com"
 }
