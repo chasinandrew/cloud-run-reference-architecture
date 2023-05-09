@@ -33,8 +33,7 @@ spec: #TODO: labels
           valueFrom:
             secretKeyRef:
               name: TEST
-              key: 1
-
+              key: "1"
 
   # It is recommended to use the latest version of the Cloud SQL Auth Proxy
   # Make sure to update on a regular schedule!
