@@ -9,7 +9,7 @@ env:
   GAR_LOCATION: us-east4                                        # TODO: update Artifact Registry location
   REPOSITORY: reference-architectures                           # TODO: update Artifact Registry repository name
   CONTAINER_SERVICE: pods                                       # TODO: update Cloud Run service name
-  CONTAINER_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
+  CONTAINER_DIRECTORY: ./code/helloworld-csharp
   REGION: us-east4                                              # TODO: update Cloud Run service region
   IMAGE_TAG: latest
   WORKING_DIRECTORY: ./terraform
