@@ -28,6 +28,6 @@ WORKDIR /app
 COPY --from=build-env /app/out .
 
 # Port passed in by Cloud Run via environment variable PORT.  Default 8080.
-ENV PORT=8080
+ENV PORT=80
 
 ENTRYPOINT ["dotnet", "Samples.Run.MarkdownPreview.Editor.dll"]
