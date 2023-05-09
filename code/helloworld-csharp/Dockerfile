@@ -15,5 +15,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /app
 COPY --from=build-env /app/out .
 
+ENV PORT=8080
 # Run the web service on container startup.
 ENTRYPOINT ["dotnet", "helloworld.dll"]
