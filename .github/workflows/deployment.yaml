@@ -23,6 +23,7 @@ jobs:
       pull-requests: write
       id-token: write
       contents: read
+      actions: read
     outputs: 
       access-token: ${{ steps.auth.outputs.access_token }}
     steps:
