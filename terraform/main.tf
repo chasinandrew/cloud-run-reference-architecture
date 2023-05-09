@@ -88,7 +88,7 @@ module "external-lb-https" {
 module "mssql_db" {
   source     = "./modules/mssql"
   project_id = var.project_id
-  name       = "new-database"
+  name       = "mssql"
   region     = var.region
   zone       = "us-east4-a"
   additional_users = [{
@@ -96,6 +96,7 @@ module "mssql_db" {
     password        = ""
     random_password = true
   }]
+  deletion_protection = false
 }
 
 
