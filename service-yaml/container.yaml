@@ -25,6 +25,16 @@ spec: #TODO: labels
         env:
         - name: PROJECT_ID
           value: ${PROJECT_ID}
+        - name: DB_USER
+          value: test
+        - name: DB_NAME
+          value:
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: <YOUR-DB-SECRET>
+              key: password
+
 
   # It is recommended to use the latest version of the Cloud SQL Auth Proxy
   # Make sure to update on a regular schedule!
