@@ -93,14 +93,9 @@ module "mssql_db" {
   zone       = "us-east4-a"
   additional_users = [{
     name            = var.database_username_secret_data
-    password        = var.database_password_secret_data
-    random_password = false
+    password        = ""
+    random_password = true
   }]
-
-  # provisioner "local-exec" {
-  #   working_dir = "${path.module}/../code/database"
-  #   command     = "./load_schema.sh ${var.project_id} ${google_sql_database_instance.main.name}"
-  # }
 }
 
 
@@ -164,7 +159,7 @@ resource "google_secret_manager_secret" "sqlpassword" {
 resource "google_secret_manager_secret_version" "sqlpassword" {
   enabled     = true
   secret      = "projects/${data.google_project.project.number}/secrets/${var.database_password_secret_name}"
-  secret_data = var.database_password_secret_data
+  secret_data = module.mssql_db.additional_users[0].password
   depends_on = [
     google_secret_manager_secret.sqlpassword
   ]

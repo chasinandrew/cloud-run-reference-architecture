@@ -5,12 +5,12 @@ on:
     branches:
       - feature/parity-with-remote
 env:
-  PROJECT_ID: arched-inkwell-368821 # TODO: update Google Cloud project id
-  GAR_LOCATION: us-east4 # TODO: update Artifact Registry location
-  REPOSITORY: reference-architectures # TODO: update Artifact Registry repository name
-  CONTAINER_SERVICE: pods # TODO: update Cloud Run service name
+  PROJECT_ID: arched-inkwell-368821                             # TODO: update Google Cloud project id
+  GAR_LOCATION: us-east4                                        # TODO: update Artifact Registry location
+  REPOSITORY: reference-architectures                           # TODO: update Artifact Registry repository name
+  CONTAINER_SERVICE: pods                                       # TODO: update Cloud Run service name
   CONTAINER_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
-  REGION: us-east4 # TODO: update Cloud Run service region
+  REGION: us-east4                                              # TODO: update Cloud Run service region
   IMAGE_TAG: latest
   WORKING_DIRECTORY: ./terraform
   CLOUD_RUN_SA: cloud-run-sa
@@ -63,7 +63,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false -var-file=dev.tfvars -var="database_password_secret_name=${{ secrets.DB_SECRET_NAME }}"
+        run: terraform plan -no-color -input=false -var-file=dev.tfvars 
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Terraform Plan Status
@@ -72,7 +72,7 @@ jobs:
 
       - name: Terraform Apply
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=dev.tfvars -var="database_password_secret_name=${{ secrets.DB_SECRET_NAME }}"
+        run: terraform apply -auto-approve -input=false -var-file=dev.tfvars
         working-directory: ${{ env.WORKING_DIRECTORY }}
         
 ######### DECOUPLE THIS TO ANOTHER PIPELINE #########
@@ -87,6 +87,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        
       # Authenticate Docker to Google Cloud Artifact Registry
       - name: Docker Auth
         id: docker-auth
