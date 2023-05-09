@@ -91,6 +91,11 @@ module "mssql_db" {
   name       = "mssql"
   region     = var.region
   zone       = "us-east4-a"
+  additional_users = [{
+    name            = var.database_username_secret_data
+    password        = var.database_password_secret_data
+    random_password = false
+  }]
 
   # provisioner "local-exec" {
   #   working_dir = "${path.module}/../code/database"
@@ -100,16 +105,16 @@ module "mssql_db" {
 
 
 resource "google_secret_manager_secret" "sqluser" {
-  project = "${data.google_project.project.number}"
+  project = data.google_project.project.number
   replication {
-      user_managed {
-        replicas {
-          location = var.region
+    user_managed {
+      replicas {
+        location = var.region
       }
     }
   }
   rotation {
-    rotation_period =  "31536000s"
+    rotation_period    = "31536000s"
     next_rotation_time = timeadd("2023-05-08T17:00:00Z", "31536000s")
   }
   topics {
@@ -125,7 +130,7 @@ resource "google_secret_manager_secret" "sqluser" {
 
 resource "google_secret_manager_secret_version" "sqluser" {
   enabled     = true
-  secret      = "projects/${data.google_project.project.number}/secrets/${var.database_username_secret_data}" 
+  secret      = "projects/${data.google_project.project.number}/secrets/${var.database_username_secret_data}"
   secret_data = var.database_username_secret_data
   depends_on = [
     google_secret_manager_secret.sqluser
@@ -133,16 +138,16 @@ resource "google_secret_manager_secret_version" "sqluser" {
 }
 
 resource "google_secret_manager_secret" "sqlpassword" {
-  project = "${data.google_project.project.number}" 
+  project = data.google_project.project.number
   replication {
-      user_managed {
-        replicas {
-          location = var.region
+    user_managed {
+      replicas {
+        location = var.region
       }
     }
   }
   rotation {
-    rotation_period =  "31536000s"
+    rotation_period    = "31536000s"
     next_rotation_time = timeadd("2023-05-08T17:00:00Z", "31536000s")
   }
   topics {
@@ -158,7 +163,7 @@ resource "google_secret_manager_secret" "sqlpassword" {
 
 resource "google_secret_manager_secret_version" "sqlpassword" {
   enabled     = true
-  secret      = "projects/${data.google_project.project.number}/secrets/${var.database_password_secret_name}" 
+  secret      = "projects/${data.google_project.project.number}/secrets/${var.database_password_secret_name}"
   secret_data = var.database_password_secret_data
   depends_on = [
     google_secret_manager_secret.sqlpassword
@@ -166,15 +171,15 @@ resource "google_secret_manager_secret_version" "sqlpassword" {
 }
 
 resource "google_pubsub_topic" "topic" {
-  name = "secret-topic"
+  name    = "secret-topic"
   project = var.project_id
 }
 
 resource "google_pubsub_topic_iam_member" "member" {
   project = var.project_id
-  topic = google_pubsub_topic.topic.name
-  role = "roles/pubsub.publisher"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
+  topic   = google_pubsub_topic.topic.name
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
   depends_on = [
     google_project_service_identity.sm_sa
   ]
@@ -182,6 +187,6 @@ resource "google_pubsub_topic_iam_member" "member" {
 
 resource "google_project_service_identity" "sm_sa" {
   provider = google-beta
-  project = data.google_project.project.project_id
-  service = "secretmanager.googleapis.com"
+  project  = data.google_project.project.project_id
+  service  = "secretmanager.googleapis.com"
 }
