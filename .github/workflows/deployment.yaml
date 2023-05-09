@@ -87,14 +87,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
+
       # Authenticate Docker to Google Cloud Artifact Registry
       - name: Docker Auth
         id: docker-auth
         uses: 'docker/login-action@v1'
         with:
           username: 'oauth2accesstoken'
-          password: '${{ needs.terraform.outputs.access_token }}'
+          password: '${{ needs.terraform.outputs.access-token }}'
           registry: '${{ env.GAR_LOCATION }}-docker.pkg.dev'
 
       - name: Build and Tag
