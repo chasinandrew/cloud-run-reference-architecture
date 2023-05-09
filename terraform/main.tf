@@ -1,13 +1,3 @@
-data "google_project" "project" {
-  project_id = var.project_id
-}
-
-data "google_cloud_run_service" "container" {
-  project  = var.project_id
-  name     = var.frontend_service_name
-  location = var.region
-}
-
 resource "google_tags_location_tag_binding" "binding" {
   parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/${var.frontend_service_name}"
   tag_value = "tagValues/1067211650924"
@@ -109,49 +99,80 @@ module "mssql_db" {
 }
 
 
-# resource "google_secret_manager_secret" "sqluser" {
-#   project = 730509154195 #TODO: change to variable
-#   replication {
-#       user_managed {
-#         replicas {
-#           location = local.region
-#       }
-#     }
-#   }
-#   rotation {
-#     next_rotation_time = "3153600000s"
-#   }
+resource "google_secret_manager_secret" "sqluser" {
+  project = "${data.google_project.project.number}"
+  replication {
+      user_managed {
+        replicas {
+          location = var.region
+      }
+    }
+  }
+  rotation {
+    rotation_period =  "31536000s"
+    next_rotation_time = timeadd("2023-05-08T17:00:00Z", "31536000s")
+  }
+  topics {
+    name = google_pubsub_topic.topic.id
+  }
 
-#   secret_id = "sqluser"
-#   labels = module.tagging.metadata
-# }
+  secret_id = var.database_username_secret_name
+  # labels = module.tagging.metadata
+  depends_on = [
+    google_pubsub_topic_iam_member.member
+  ]
+}
 
-# resource "google_secret_manager_secret_version" "sqluser" {
-#   enabled     = true
-#   secret      = "projects/730509154195/secrets/sqluser" #TODO: change to variable
-#   secret_data = var.username_secret 
-# }
+resource "google_secret_manager_secret_version" "sqluser" {
+  enabled     = true
+  secret      = "projects/${data.google_project.project.number}/secrets/${var.database_username_secret_data}" 
+  secret_data = var.database_username_secret_data
+  depends_on = [
+    google_secret_manager_secret.sqluser
+  ]
+}
 
-# resource "google_secret_manager_secret" "sqlpassword" {
-#   project = 730509154195 #TODO: change to variable
-#   replication {
-#       user_managed {
-#         replicas {
-#           location = local.region
-#       }
-#     }
-#   }
-#   rotation {
-#     next_rotation_time = "3153600000s"
-#   }
+resource "google_secret_manager_secret" "sqlpassword" {
+  project = "${data.google_project.project.number}" 
+  replication {
+      user_managed {
+        replicas {
+          location = var.region
+      }
+    }
+  }
+  rotation {
+    rotation_period =  "31536000s"
+    next_rotation_time = timeadd("2023-05-08T17:00:00Z", "31536000s")
+  }
+  topics {
+    name = google_pubsub_topic.topic.id
+  }
 
-#   secret_id = "sqlpassword"
-#   labels = module.tagging.metadata
-# }
+  secret_id = var.database_password_secret_name
+  # labels = module.tagging.metadata
+  depends_on = [
+    google_pubsub_topic_iam_member.member
+  ]
+}
 
-# resource "google_secret_manager_secret_version" "sqlpassword" {
-#   enabled     = true
-#   secret      = "projects/730509154195/secrets/sqluser" #TODO: change to variable
-#   secret_data = var.password_secret
-# }
+resource "google_secret_manager_secret_version" "sqlpassword" {
+  enabled     = true
+  secret      = "projects/${data.google_project.project.number}/secrets/${var.database_password_secret_name}" 
+  secret_data = var.database_password_secret_data
+  depends_on = [
+    google_secret_manager_secret.sqlpassword
+  ]
+}
 
+resource "google_pubsub_topic" "topic" {
+  name = "secret-topic"
+  project = var.project_id
+}
+
+resource "google_pubsub_topic_iam_member" "member" {
+  project = var.project_id
+  topic = google_pubsub_topic.topic.name
+  role = "roles/pubsub.publisher"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
+}
