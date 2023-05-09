@@ -36,9 +36,9 @@ jobs:
           service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
       #TODO: REMOVE AFTER FIRST RUN
-      - name: Deploy to Cloud Run 
-        run: |- 
-          gcloud run deploy ${{ env.CONTAINER_SERVICE }} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+      # - name: Deploy to Cloud Run 
+      #   run: |- 
+      #     gcloud run deploy ${{ env.CONTAINER_SERVICE }} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
