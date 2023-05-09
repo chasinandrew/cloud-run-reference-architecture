@@ -28,12 +28,12 @@ spec: #TODO: labels
         - name: DB_USER
           value: test
         - name: DB_NAME
-          value:
+          value: default
         - name: DB_PASS
           valueFrom:
             secretKeyRef:
-              name: <YOUR-DB-SECRET>
-              key: password
+              name: TEST
+              key: 1
 
 
   # It is recommended to use the latest version of the Cloud SQL Auth Proxy
