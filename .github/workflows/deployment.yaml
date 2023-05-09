@@ -35,7 +35,7 @@ jobs:
         with:
           token_format: 'access_token'
           workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
       #TODO: REMOVE AFTER FIRST RUN
       - name: Deploy to Cloud Run 
@@ -82,7 +82,7 @@ jobs:
     needs: [terraform]
     permissions:
       pull-requests: write
-      id-token: write
+      id-token: read
       contents: read
     steps:
       - name: Checkout
