@@ -13,7 +13,7 @@ RUN dotnet publish -c Release -o out
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /
-COPY --from=build-env /out .
+COPY --from=build-env / .
 
 ENV PORT=8080
 # Run the web service on container startup.
