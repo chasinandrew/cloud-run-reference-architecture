@@ -1,20 +1,19 @@
-# Use Microsoft's official build .NET image.
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
-WORKDIR /
+WORKDIR /app
 
-# Copy csproj and restore as distinct layers
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copy everything else and build
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -r linux-x64 --no-self-contained -p:PublishReadyToRun=true -c Release -o out
 
-# Build runtime image
+# Copy to runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
-WORKDIR /
-COPY --from=build-env / .
+WORKDIR /app
+COPY --from=build-env /app/out .
 
+# Port passed in by Cloud Run via environment variable PORT.  Default 8080.
 ENV PORT=8080
+
 # Run the web service on container startup.
 ENTRYPOINT ["dotnet", "helloworld.dll"]
