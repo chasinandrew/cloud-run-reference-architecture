@@ -7,16 +7,6 @@ resource "google_tags_location_tag_binding" "binding" {
   ]
 }
 
-data "google_iam_policy" "noauth" {
-  provider = google-beta
-  binding {
-    role = "roles/run.invoker"
-    members = [
-      "allUsers",
-    ]
-  }
-}
-
 resource "google_cloud_run_service_iam_policy" "noauth" {
   location    = var.region
   project     = var.project_id
@@ -98,7 +88,6 @@ module "mssql_db" {
   }]
   deletion_protection = false
 }
-
 
 resource "google_secret_manager_secret" "sqluser" {
   project = data.google_project.project.number
