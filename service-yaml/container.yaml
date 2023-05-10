@@ -14,14 +14,14 @@ spec:
         autoscaling.knative.dev/minScale: '3'
         autoscaling.knative.dev/maxScale: '100'
       labels: 
-        region:us-east4
-        app_code:test
-        classification:test
-        cost_id:test
-        department_id:test
-        hca_project_id:test
-        tco_id:test
-        app_environment:dev
+        region: us-east4
+        app_code: test
+        classification: test
+        cost_id: test
+        department_id: test
+        hca_project_id: test
+        tco_id: test
+        app_environment: dev
     spec:
       containerConcurrency: 80
       serviceAccountName: ${CLOUD_RUN_SA}
