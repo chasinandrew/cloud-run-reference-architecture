@@ -7,3 +7,13 @@ data "google_cloud_run_service" "container" {
   name     = var.frontend_service_name
   location = var.region
 }
+
+data "google_iam_policy" "noauth" {
+  provider = google-beta
+  binding {
+    role = "roles/run.invoker"
+    members = [
+      "allUsers",
+    ]
+  }
+}

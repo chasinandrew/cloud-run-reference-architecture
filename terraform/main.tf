@@ -7,16 +7,6 @@ resource "google_tags_location_tag_binding" "binding" {
   ]
 }
 
-data "google_iam_policy" "noauth" {
-  provider = google-beta
-  binding {
-    role = "roles/run.invoker"
-    members = [
-      "allUsers",
-    ]
-  }
-}
-
 resource "google_cloud_run_service_iam_policy" "noauth" {
   location    = var.region
   project     = var.project_id
@@ -91,13 +81,19 @@ module "mssql_db" {
   name       = "mssql"
   region     = var.region
   zone       = "us-east4-a"
+  root_password = random_password.root-password.result
   additional_users = [{
     name            = var.database_username_secret_data
     password        = ""
     random_password = true
   }]
+  deletion_protection = false
 }
 
+resource "random_password" "root-password" {
+  length  = 8
+  special = true
+}
 
 resource "google_secret_manager_secret" "sqluser" {
   project = data.google_project.project.number
@@ -159,7 +155,8 @@ resource "google_secret_manager_secret" "sqlpassword" {
 resource "google_secret_manager_secret_version" "sqlpassword" {
   enabled     = true
   secret      = "projects/${data.google_project.project.number}/secrets/${var.database_password_secret_name}"
-  secret_data = module.mssql_db.additional_users[0].password
+  # secret_data = module.mssql_db.additional_users[0].password
+  secret_data = random_password.root-password.result
   depends_on = [
     google_secret_manager_secret.sqlpassword
   ]
