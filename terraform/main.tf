@@ -83,7 +83,7 @@ module "mssql_db" {
   zone       = "us-east4-a"
   root_password = random_password.root-password.result
   additional_users = [{
-    name            = var.database_username_secret_data
+    name            = "sqlusertest"
     password        = ""
     random_password = true
   }]
@@ -93,39 +93,6 @@ module "mssql_db" {
 resource "random_password" "root-password" {
   length  = 8
   special = true
-}
-
-resource "google_secret_manager_secret" "sqluser" {
-  project = data.google_project.project.number
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-  rotation {
-    rotation_period    = "31536000s"
-    next_rotation_time = timeadd("2023-05-08T17:00:00Z", "31536000s")
-  }
-  topics {
-    name = google_pubsub_topic.topic.id
-  }
-
-  secret_id = var.database_username_secret_name
-  # labels = module.tagging.metadata
-  depends_on = [
-    google_pubsub_topic_iam_member.member
-  ]
-}
-
-resource "google_secret_manager_secret_version" "sqluser" {
-  enabled     = true
-  secret      = "projects/${data.google_project.project.number}/secrets/${var.database_username_secret_data}"
-  secret_data = var.database_username_secret_data
-  depends_on = [
-    google_secret_manager_secret.sqluser
-  ]
 }
 
 resource "google_secret_manager_secret" "sqlpassword" {
