@@ -20,12 +20,6 @@ variable "frontend_service_name" {
 }
 
 
-variable "database_username_secret_name" {
-  type        = string
-  description = "The name of the secret that will be created for the Cloud SQL username. "
-  # sensitive   = true
-}
-
 variable "database_password_secret_name" {
   type        = string
   description = "The name of the secret that will be created for the Cloud SQL password. "
