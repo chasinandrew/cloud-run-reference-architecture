@@ -60,7 +60,7 @@ jobs:
       ## Terraform Plan All ENVs
       - name: Terraform Plan DEV
         id: plan_dev
-        run: terraform plan -no-color -input=false -var-file=dev/dev.tfvars -var='service_name=${{ env.SERVICE_NAME }}'
+        run: terraform plan -no-color -input=false -var-file=envs/dev/dev.tfvars-var='service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Terraform Plan QA
@@ -82,7 +82,7 @@ jobs:
       ## Terraform Apply DEV
       - name: Terraform Apply DEV
         if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=dev/dev.tfvars -var='service_name=${{ env.SERVICE_NAME }}'
+        run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars-var='service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
       
       ## Terraform Apply QA
