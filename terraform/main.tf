@@ -18,7 +18,7 @@ module "gh_oidc_wif" {
 resource "google_service_account" "gh_sa" {
   project = var.project_id
   account_id = "gh-oidc-wif"
-  display_name = "Service Account for authenticating from GitHub to GCP to push container images and deploy Cloud Run containers."
+  display_name = "Service Account for auth to push container images and deploy Cloud Run containers."
 }
 
 resource "google_project_iam_binding" "ar_writer" {
