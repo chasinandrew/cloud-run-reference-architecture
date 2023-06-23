@@ -1,124 +1,45 @@
-name: Build and Deploy to Cloud Run
-
+name: Plan and Apply Terraform
 on:
   push:
+  pull_request:
     branches:
-      - develop
-env:
-  PROJECT_ID: arched-inkwell-368821 # TODO: update Google Cloud project id
-  GAR_LOCATION: us-east4 # TODO: update Artifact Registry location
-  REPOSITORY: reference-architectures # TODO: update Artifact Registry repository name
-  BACKEND_SERVICE: backend # TODO: update Cloud Run service name
-  BACKEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Renderer
-  FRONTEND_SERVICE: frontend # TODO: update Cloud Run service name
-  FRONTEND_DIRECTORY: ./code/Samples.Run.MarkdownPreview.Editor
-  REGION: us-east4 # TODO: update Cloud Run service region
-  IMAGE_TAG: latest
+    - 'feature/**'
+    - 'develop'
+    - 'qa'
+    - 'main'
+
+env: 
   WORKING_DIRECTORY: ./terraform
+  SERVICE_NAME: pods
 
 jobs:
-  deploy-frontend:
-    # Add 'id-token' with the intended permissions for workload identity federation
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
-    runs-on: ubuntu-latest
-    outputs: 
-      frontend-image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Google Auth
-        id: auth
-        uses: 'google-github-actions/auth@v0'
-        with:
-          token_format: 'access_token'
-          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
-
-      # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
-
-      # Authenticate Docker to Google Cloud Artifact Registry
-      - name: Docker Auth
-        id: docker-auth
-        uses: 'docker/login-action@v1'
-        with:
-          username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.access_token }}'
-          registry: '${{ env.GAR_LOCATION }}-docker.pkg.dev'
-
-      - name: Build and Tag
-        id: build-image
-        uses: docker/build-push-action@v3
-        with:
-          context: ${{ env.FRONTEND_DIRECTORY }}
-          push: true 
-          tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}
-      
-      - name: Docker Push
-        run: |-
-          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FRONTEND_SERVICE }}:${{ env.IMAGE_TAG }}"
-  deploy-backend:
-    # Add 'id-token' with the intended permissions for workload identity federation
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
-    runs-on: ubuntu-latest
-    outputs:
-      backend-image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.BACKEND_SERVICE }}:${{ env.IMAGE_TAG }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Google Auth
-        id: auth
-        uses: 'google-github-actions/auth@v0'
-        with:
-          token_format: 'access_token'
-          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
-
-      # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
-
-      # Authenticate Docker to Google Cloud Artifact Registry
-      - name: Docker Auth
-        id: docker-auth
-        uses: 'docker/login-action@v1'
-        with:
-          username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.access_token }}'
-          registry: '${{ env.GAR_LOCATION }}-docker.pkg.dev'
-
-      - name: Build and Tag
-        id: build-image
-        uses: docker/build-push-action@v3
-        with:
-          context: ${{ env.BACKEND_DIRECTORY }}
-          push: true 
-          tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.BACKEND_SERVICE }}:${{ env.IMAGE_TAG }}
-      
-      - name: Docker Push
-        run: |-
-          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.BACKEND_SERVICE }}:${{ env.IMAGE_TAG }}"
-    # END - Docker auth and build
-
   terraform: 
-    name: "Terraform"
-    needs: [deploy-frontend, deploy-backend]
+    name: "Terraform Deployment"
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      actions: read
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+
+      #TODO: REMOVE AFTER FIRST RUN
+      # - name: Deploy to Cloud Run 
+      #   run: |- 
+      #     gcloud run deploy ${{ env.CONTAINER_SERVICE }} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          # terraform_version: 1.4.2
           cli_config_credentials_token: ${{ secrets.TF_API_KEY }}
 
       - name: Terraform Format
@@ -135,17 +56,46 @@ jobs:
         run: terraform validate -no-color
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color -input=false -var-file=dev.tfvars -var='frontend_container_image=${{ needs.deploy-backend.outputs.backend-image }}' -var='backend_container_image=${{ needs.deploy-frontend.outputs.frontend-image}}'
+
+      ## Terraform Plan All ENVs
+      - name: Terraform Plan DEV
+        id: plan_dev
+        run: terraform plan -no-color -input=false -var-file=envs/dev/dev.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Terraform Plan QA
+        id: plan_qa
+        if: github.ref == 'refs/heads/develop' && github.event_name == 'pull_request'
+        run: terraform plan -no-color -input=false -var-file=qa/qa.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Terraform Plan PROD
+        id: plan_prod
+        if: github.ref == 'refs/heads/qa' && github.event_name == 'pull_request'
+        run: terraform plan -no-color -input=false -var-file=prod/prod.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Terraform Apply
-        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=dev.tfvars -var='frontend_container_image=${{ needs.deploy-frontend.outputs.frontend-image }}' -var='backend_container_image=${{ needs.deploy-backend.outputs.backend-image}}'
+      ## Terraform Apply DEV
+      - name: Terraform Apply DEV
+        if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
+      
+      ## Terraform Apply QA
+      - name: Terraform Apply QA
+        if: github.ref == 'refs/heads/qa' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=qa/qa.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      ## Terraform Apply PROD
+      - name: Terraform Apply PROD
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=prod/prod.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        
+
 
