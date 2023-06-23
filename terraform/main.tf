@@ -16,6 +16,7 @@ module "gh_oidc_wif" {
 }
 
 resource "google_service_account" "gh_sa" {
+  project = var.project_id
   account_id = "gh-oidc-wif"
   display_name = "Service Account for authenticating from GitHub to GCP to push container images and deploy Cloud Run containers."
 }
@@ -33,6 +34,7 @@ resource "google_project_iam_binding" "run_admin" {
 }
 
 resource "google_artifact_registry_repository" "docker_repo" {
+  project = var.project_id
   location      = var.region
   repository_id = var.frontend_service_name
   description   = "Docker repository for container images."
