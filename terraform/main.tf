@@ -1,3 +1,46 @@
+module "gh_oidc_wif" {
+  source = "./modules/wif"
+  project_id = var.project_id
+  pool_id = "gh-push-auth-pool"
+  provider_id = "gh-push-auth-provider"
+  sa_mapping = {
+    "gh-push" = {
+      sa_name = google_service_account.gh_sa.id
+      attribute = "attribute.repository/user/repo"
+    }
+  }
+  attribute_condition = "google.subject.contains(\"chasinandrew/sample-code\")"
+  attribute_mapping = {
+    "google.subject" = "assertion.repository"
+  }
+}
+
+resource "google_service_account" "gh_sa" {
+  project = var.project_id
+  account_id = "gh-wif"
+  display_name = "Service Account for auth to push container images and deploy Cloud Run containers."
+}
+
+resource "google_project_iam_binding" "ar_writer" {
+  project = var.project_id
+  role = "roles/artifactregistry.writer"
+  members = [google_service_account.gh_sa.member]
+}
+
+resource "google_project_iam_binding" "run_admin" {
+  project = var.project_id
+  role = "roles/run.admin"
+  members = [google_service_account.gh_sa.member]
+}
+
+resource "google_artifact_registry_repository" "docker_repo" {
+  project = var.project_id
+  location      = var.region
+  repository_id = var.frontend_service_name
+  description   = "Docker repository for container images."
+  format        = "DOCKER"
+}
+
 resource "google_tags_location_tag_binding" "binding" {
   parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/${var.frontend_service_name}"
   tag_value = "tagValues/1067211650924"
