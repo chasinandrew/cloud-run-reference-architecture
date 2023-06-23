@@ -54,7 +54,7 @@ resource "google_cloud_run_service_iam_member" "noauth" {
   location = var.region
   project  = var.project_id
   service  = var.frontend_service_name
-  roles    = "roles/run.invoker"
+  role    = "roles/run.invoker"
   member   = "allUsers"
   depends_on = [
     data.google_cloud_run_service.container
