@@ -9,7 +9,6 @@ variable "region" {
   description = "The region to create GCP resources within."
 }
 
-
 variable "frontend_service_name" {
   type        = string
   description = "The service name of the frontend Cloud Run instance."
