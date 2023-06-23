@@ -16,7 +16,7 @@ module "gh_oidc_wif" {
 }
 
 resource "google_service_account" "gh_sa" {
-  account_id = "gh_oidc_wif"
+  account_id = "gh-oidc-wif"
   display_name = "Service Account for authenticating from GitHub to GCP to push container images and deploy Cloud Run containers."
 }
 
