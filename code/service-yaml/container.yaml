@@ -1,0 +1,77 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations: 
+    run.googleapis.com/launch-stage: ALPHA
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing 
+  name: ${SERVICE_NAME}
+spec:
+  template:
+    metadata:      
+      name: ${SERVICE_NAME}-${REVISION_TAG} 
+      annotations:
+        run.googleapis.com/execution-environment: gen1
+        run.googleapis.com/vpc-access-egress: all-traffic
+        run.googleapis.com/vpc-access-connector: projects/arched-inkwell-368821/locations/us-east4/connectors/pods-2
+        autoscaling.knative.dev/minScale: '3'
+        autoscaling.knative.dev/maxScale: '100'
+      labels: #TODO: change all labels #
+        region: us-east4
+        app_code: test
+        classification: test
+        cost_id: test
+        department_id: test
+        hca_project_id: test
+        tco_id: test
+        app_environment: dev
+    spec:
+      containerConcurrency: 80
+      serviceAccountName: ${CLOUD_RUN_SA}
+      containers:
+      - image: ${CONTAINER_IMAGE}
+        name: ${SERVICE_NAME}
+        ports: 
+        - name: http1
+          containerPort: 80
+        env:
+        - name: PROJECT_ID
+          value: ${PROJECT_ID}
+        - name: DB_USER 
+          value: sqluser #TODO: change to true database username 
+        - name: DB_NAME 
+          value: mssql #TODO: change to true database name 
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: DB_PASS #TODO: change to true secret name 
+              key: "1" #TODO: change to true secret key
+
+      # It is recommended to use the latest version of the Cloud SQL Auth Proxy
+      # Make sure to update on a regular schedule!
+      - image: gcr.io/cloudsql-docker/gce-proxy:latest
+        name: cloud-sql-proxy
+        command:
+          - "/cloud_sql_proxy"
+
+          # If connecting from a VPC-native GKE cluster, you can use the
+          # following flag to have the proxy connect over private IP
+          # - "-ip_address_types=PRIVATE"
+
+          # By default, the proxy will write all logs to stderr. In some
+          # environments, anything printed to stderr is consider an error. To
+          # disable this behavior and write all logs to stdout (except errors
+          # which will still go to stderr), use:
+          - "-log_debug_stdout"
+
+          # Replace DB_PORT with the port the proxy should listen on
+          # Defaults: MySQL: 3306, Postgres: 5432, SQLServer: 1433
+          - "-instances=${DATABASE}=tcp:1433"
+
+
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu:    "1" #
+  traffic: 
+  - percent: 100
+    latestRevision: true
