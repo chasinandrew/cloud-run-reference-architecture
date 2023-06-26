@@ -43,7 +43,7 @@ public class RenderController : Controller
     }
     // [END cloudrun_secure_request_do]
 
-    // [START cloudrun_secure_request]
+    // [START cloudrun_secure_request] //
     private async Task<string> GetAuthenticatedPostResponse(string url, string postBody)
     {
         // Get the OIDC access token from the service account via Application Default Credentials
