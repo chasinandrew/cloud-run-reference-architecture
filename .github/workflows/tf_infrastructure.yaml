@@ -16,6 +16,7 @@ env:
 
 jobs:
   terraform: 
+    if: github.event.path == 'terraform'
     name: "Terraform Deployment"
     runs-on: ubuntu-latest
     permissions:
