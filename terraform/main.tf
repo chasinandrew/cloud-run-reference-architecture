@@ -191,4 +191,4 @@ resource "google_project_service_identity" "sm_sa" {
   provider = google-beta
   project  = data.google_project.project.project_id
   service  = "secretmanager.googleapis.com"
-}
+}#
