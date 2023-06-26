@@ -24,7 +24,7 @@ jobs:
       environment: dev
       ref: ${{ github.sha }}
       gcp_project_id: arched-inkwell-368821
-      artifact_registry_repo: new
+      artifact_registry_repo: reference-architectures
       region: us-east4
       docker_image_name: pods
       service_name: pods #
