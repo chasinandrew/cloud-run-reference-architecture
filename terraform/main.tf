@@ -19,7 +19,7 @@ resource "google_service_account" "gh_sa" {
   project      = var.project_id
   account_id   = "gh-wif"
   display_name = "Service Account for auth to push container images and deploy Cloud Run containers."
-}
+} #testing123
 
 resource "google_project_iam_binding" "ar_writer" {
   project = var.project_id #
