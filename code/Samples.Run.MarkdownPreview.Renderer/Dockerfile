@@ -22,7 +22,7 @@ RUN dotnet restore
 COPY . ./
 RUN dotnet publish -r linux-x64 --no-self-contained -p:PublishReadyToRun=true -c Release -o out
 
-# Copy to runtime image
+# Copy to runtime image#
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=build-env /app/out .
