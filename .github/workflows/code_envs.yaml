@@ -1,4 +1,4 @@
-name: Build and Deploy to Cloud Run
+name: CLOUD RUN WORKFLOW BUILD AND DEPLOY
 on:
   push:
     paths: 

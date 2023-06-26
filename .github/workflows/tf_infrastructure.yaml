@@ -1,4 +1,4 @@
-name: Plan and Apply Terraform
+name: PLAN AND APPLY TERRAFORM
 on:
   push:
     paths: 
