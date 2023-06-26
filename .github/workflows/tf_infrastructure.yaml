@@ -3,7 +3,7 @@ on:
   push:
   pull_request:
     paths: 
-    - '/terraform/**'
+    - 'terraform/**'
     branches:
     - 'feature/**'
     - 'develop'
