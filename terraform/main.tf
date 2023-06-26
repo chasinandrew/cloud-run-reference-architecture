@@ -23,7 +23,7 @@ resource "google_service_account" "gh_sa" {
 
 resource "google_project_iam_binding" "ar_writer" {
   project = var.project_id
-  role    = "roles/artifactregistry.writer" #
+  role    = "roles/artifactregistry.writer" 
   members = [google_service_account.gh_sa.member]
 }
 

@@ -93,7 +93,7 @@ jobs:
           export REVISION_TAG="${{ inputs.ref }}"
           export CLOUD_RUN_SA="${{ inputs.cloud_run_sa }}"
           export DATABASE="${{ secrets.database }}"
-          envsubst < ./service-yaml/container.yaml > container.yaml
+          envsubst < ./code/service-yaml/container.yaml > container.yaml
         
       - name: Deploy to Cloud Run
         run: |- 
