@@ -73,5 +73,7 @@ spec:
             memory: "2Gi"
             cpu:    "1" #
   traffic: 
-  - percent: 100
-    latestRevision: true
+  - revisionName: ${SERVICE_NAME}-${REVISION_TAG}
+    percent: 50
+  - revisionName: pods-f1b3a7b82ff322033c06e8804900a7d8e30e5427
+    percent: 50
