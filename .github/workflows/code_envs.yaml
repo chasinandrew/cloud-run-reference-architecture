@@ -1,0 +1,69 @@
+name: Build and Deploy to Cloud Run
+on:
+  push:
+    paths: 
+    - '/code/**'
+    branches:
+    - 'feature/**'
+    - 'develop'
+    - 'qa'
+    - 'main'
+
+jobs: 
+  #TODO: add feature branch unit tests
+  #TODO: add vulnerability scanning
+
+  #DEV
+  dev:
+    if: startsWith(github.ref_name, 'feature')
+    uses: ./.github/workflows/deployment.yaml
+    permissions: 
+      id-token: write
+      contents: read
+    with: 
+      environment: dev
+      ref: ${{ github.sha }}
+      gcp_project_id: arched-inkwell-368821
+      artifact_registry_repo: new
+      region: us-east4
+      docker_image_name: pods
+      service_name: pods #
+      code_directory: ./code/Samples.Run.MarkdownPreview.Editor
+      cloud_run_sa: cloud-run-sa
+    secrets: inherit
+  
+  #QA
+  qa:
+    if: startsWith(github.ref_name, 'qa')
+    uses: ./.github/workflows/deployment.yaml
+    permissions: 
+      id-token: write
+      contents: read
+    with: 
+      environment: qa
+      ref: ${{ github.sha }}
+      gcp_project_id: arched-inkwell-368821
+      artifact_registry_repo: reference-architectures
+      region: us-east4
+      docker_image_name: pods
+      service_name: pods
+      code_directory: ./code/Samples.Run.MarkdownPreview.Editor
+    secrets: inherit
+  
+  #PROD
+  prod: 
+    if: startsWith(github.ref_name, 'main')
+    uses: ./.github/workflows/deployment.yaml
+    permissions: 
+      id-token: write
+      contents: read
+    with: 
+      environment: prod
+      ref: ${{ github.sha }}
+      gcp_project_id: arched-inkwell-368821
+      artifact_registry_repo: reference-architectures
+      region: us-east4
+      docker_image_name: pods
+      service_name: pods
+      code_directory: ./code/Samples.Run.MarkdownPreview.Editor
+    secrets: inherit

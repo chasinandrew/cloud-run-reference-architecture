@@ -2,6 +2,8 @@ name: Plan and Apply Terraform
 on:
   push:
   pull_request:
+    paths: 
+    - '/terraform/**'
     branches:
     - 'feature/**'
     - 'develop'
