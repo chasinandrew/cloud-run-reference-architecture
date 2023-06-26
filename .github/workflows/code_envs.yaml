@@ -16,7 +16,7 @@ jobs:
   #DEV
   dev:
     if: startsWith(github.ref_name, 'feature')
-    uses: ./.github/workflows/deployment.yaml
+    uses: ./.github/workflows/code_envs.yaml
     permissions: 
       id-token: write
       contents: read
@@ -35,7 +35,7 @@ jobs:
   #QA
   qa:
     if: startsWith(github.ref_name, 'qa')
-    uses: ./.github/workflows/deployment.yaml
+    uses: ./.github/workflows/code_envs.yaml
     permissions: 
       id-token: write
       contents: read
@@ -53,7 +53,7 @@ jobs:
   #PROD
   prod: 
     if: startsWith(github.ref_name, 'main')
-    uses: ./.github/workflows/deployment.yaml
+    uses: ./.github/workflows/code_envs.yaml
     permissions: 
       id-token: write
       contents: read
