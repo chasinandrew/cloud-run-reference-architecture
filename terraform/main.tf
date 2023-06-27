@@ -130,6 +130,11 @@ module "mssql_db" {
     password        = ""
     random_password = true
   }]
+  additional_databases = [{
+    name = var.database_name
+    collation = "SQL_Latin1_General_CP1_CI_AS"
+    charset = "UTF8"
+  }]
   deletion_protection = false
 }
 
@@ -138,39 +143,6 @@ resource "random_password" "root-password" {
   special = true
 }
 
-resource "google_secret_manager_secret" "sqlpassword" {
-  project = data.google_project.project.number
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-  rotation {
-    rotation_period    = "31536000s"
-    next_rotation_time = timeadd("2023-05-08T17:00:00Z", "31536000s")
-  }
-  topics {
-    name = google_pubsub_topic.topic.id
-  }
-
-  secret_id = var.database_password_secret_name
-  # labels = module.tagging.metadata
-  depends_on = [
-    google_pubsub_topic_iam_member.member
-  ]
-}
-
-resource "google_secret_manager_secret_version" "sqlpassword" {
-  enabled = true
-  secret  = "projects/${data.google_project.project.number}/secrets/${var.database_password_secret_name}"
-  # secret_data = module.mssql_db.additional_users[0].password
-  secret_data = random_password.root-password.result
-  depends_on = [
-    google_secret_manager_secret.sqlpassword
-  ]
-}
 
 resource "google_pubsub_topic" "topic" {
   name    = "secret-topic"
@@ -191,4 +163,31 @@ resource "google_project_service_identity" "sm_sa" {
   provider = google-beta
   project  = data.google_project.project.project_id
   service  = "secretmanager.googleapis.com"
-}#
+}
+
+module "secret-manager" {
+  source  = "./modules/secret-manager"
+  project_id = var.project_id
+  secrets = [
+    {
+      name                     = "DB_PASSWORD"
+      automatic_replication    = true
+      secret_data              = random_password.root-password.result
+    },
+    {
+      name                     = "DB_USERNAME"
+      automatic_replication    = true
+      secret_data              = "sqlserver"
+    },
+    {
+      name                     = "DB_CONNECTION_STRING"
+      automatic_replication    = true
+      secret_data              = module.mssql_db.instance_connection_name
+    },
+    {
+      name                     = "DB_NAME"
+      automatic_replication    = true
+      secret_data              = var.database_name
+    },
+  ]
+}

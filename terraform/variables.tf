@@ -14,8 +14,7 @@ variable "frontend_service_name" {
   description = "The service name of the frontend Cloud Run instance."
 }
 
-variable "database_password_secret_name" {
+variable "database_name" {
   type        = string
-  description = "The name of the secret that will be created for the Cloud SQL password. "
-  sensitive   = true
+  description = "The database name to create. "
 }
