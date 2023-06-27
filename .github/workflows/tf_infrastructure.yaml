@@ -5,17 +5,17 @@ on:
     - 'terraform/**'
     branches:
     - 'feature/**'
-    - 'develop'
-    - 'qa'
-    - 'main'
+    - 'develop-iac'
+    - 'qa-iac'
+    - 'main-iac'
   pull_request:
     paths: 
     - 'terraform/**'
     branches:
     - 'feature/**'
-    - 'develop'
-    - 'qa'
-    - 'main'
+    - 'develop-iac'
+    - 'qa-iac'
+    - 'main-iac'
 
 env: 
   WORKING_DIRECTORY: ./terraform
