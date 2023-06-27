@@ -3,7 +3,14 @@ on:
   push:
     paths: 
     - 'terraform/**'
+    branches:
+    - 'feature/**'
+    - 'develop'
+    - 'qa'
+    - 'main'
   pull_request:
+    paths: 
+    - 'terraform/**'
     branches:
     - 'feature/**'
     - 'develop'

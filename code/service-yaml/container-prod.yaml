@@ -23,7 +23,7 @@ spec:
         department_id: placeholder
         hca_project_id: placeholder
         tco_id: placeholder
-        app_environment: dev
+        app_environment: dev #
     spec:
       containerConcurrency: 80
       serviceAccountName: ${CLOUD_RUN_SA}
