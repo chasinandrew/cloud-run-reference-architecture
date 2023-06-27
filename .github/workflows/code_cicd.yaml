@@ -45,7 +45,7 @@ on:
 
 jobs:
   cloud-run-dev: 
-    # if: startsWith(github.ref, 'feature') 
+    if: startsWith(github.ref_name, 'feature')
     name: "Image Build & Cloud Run Deploy DEV"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}

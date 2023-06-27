@@ -18,8 +18,6 @@ on:
     - 'main'
 
 jobs: 
-  #TODO: add feature branch unit tests
-  #TODO: add vulnerability scanning
 
   #DEV
   dev:
