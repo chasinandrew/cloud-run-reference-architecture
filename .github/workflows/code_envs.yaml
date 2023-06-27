@@ -21,7 +21,7 @@ jobs:
 
   #DEV
   dev:
-    if: github.event == 'pull_request'
+    if: github.event == 'push'
     uses: ./.github/workflows/code_cicd.yaml
     permissions: 
       id-token: write
