@@ -45,7 +45,7 @@ on:
 
 jobs:
   cloud-run-dev: 
-    if: github.ref == 'refs/heads/feature/fix-dev2' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
     name: "Image Build & Cloud Run Deploy DEV"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
