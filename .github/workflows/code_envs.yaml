@@ -21,7 +21,7 @@ jobs:
 
   #DEV
   dev:
-    if: startsWith(github.ref_name, 'feature') || github.event == 'pull_request'
+    if: github.event == 'pull_request'
     uses: ./.github/workflows/code_cicd.yaml
     permissions: 
       id-token: write
