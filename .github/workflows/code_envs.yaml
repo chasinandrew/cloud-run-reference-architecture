@@ -27,7 +27,7 @@ jobs:
       artifact_registry_repo: reference-architectures
       region: us-east4
       docker_image_name: pods
-      service_name: pods #
+      service_name: pods 
       code_directory: ./code/Samples.Run.MarkdownPreview.Editor
       cloud_run_sa: cloud-run-sa
     secrets: inherit

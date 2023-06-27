@@ -45,7 +45,7 @@ on:
 
 jobs:
   cloud-run-dev: 
-    if: ${{ inputs.environment }} == 'dev'
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
     name: "Image Build & Cloud Run Deploy DEV"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
@@ -97,12 +97,11 @@ jobs:
           envsubst < ./code/service-yaml/container-dev-qa.yaml > container-dev-qa.yaml
         
       - name: Deploy to Cloud Run to DEV
-        if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
         run: |- 
           gcloud run services replace container-dev-qa.yaml --region=${{ inputs.region }}
   
   cloud-run-prod: 
-    if: ${{ inputs.environment }} == 'prod'
+    if: github.ref == 'refs/heads/prod' && github.event_name == 'push'
     name: "Image Build & Cloud Run Deploy PROD"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
