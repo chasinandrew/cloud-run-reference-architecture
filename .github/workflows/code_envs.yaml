@@ -18,7 +18,6 @@ on:
     - 'main'
 
 jobs: 
-
   #DEV
   dev:
     if: startsWith(github.head_ref, 'feature')
