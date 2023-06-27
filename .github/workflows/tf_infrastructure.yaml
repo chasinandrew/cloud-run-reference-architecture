@@ -1,12 +1,21 @@
-name: Plan and Apply Terraform
+name: PLAN AND APPLY TERRAFORM
 on:
   push:
-  pull_request:
+    paths: 
+    - 'terraform/**'
     branches:
     - 'feature/**'
-    - 'develop'
-    - 'qa'
-    - 'main'
+    - 'develop-iac'
+    - 'qa-iac'
+    - 'main-iac'
+  pull_request:
+    paths: 
+    - 'terraform/**'
+    branches:
+    - 'feature/**'
+    - 'develop-iac'
+    - 'qa-iac'
+    - 'main-iac'
 
 env: 
   WORKING_DIRECTORY: ./terraform
@@ -65,13 +74,13 @@ jobs:
 
       - name: Terraform Plan QA
         id: plan_qa
-        if: github.ref == 'refs/heads/develop' && github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/develop-iac' && github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false -var-file=envs/qa/qa.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Terraform Plan PROD
         id: plan_prod
-        if: github.ref == 'refs/heads/qa' && github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/qa-iac' && github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false -var-file=envs/prod/prod.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
@@ -81,19 +90,19 @@ jobs:
 
       ## Terraform Apply DEV
       - name: Terraform Apply DEV
-        if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/develop-iac' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
       
       ## Terraform Apply QA
       - name: Terraform Apply QA
-        if: github.ref == 'refs/heads/qa' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/qa-iac' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false -var-file=envs/qa/qa.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       ## Terraform Apply PROD
       - name: Terraform Apply PROD
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main-iac' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false -var-file=envs/prod/prod.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
         
