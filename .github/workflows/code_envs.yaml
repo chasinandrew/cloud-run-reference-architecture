@@ -21,7 +21,7 @@ jobs:
 
   #DEV
   dev:
-    if: startsWith(github.ref_name, 'feature')
+    if: startsWith(github.ref_name, 'feature') || startsWith(github.ref_name, 'develop')
     uses: ./.github/workflows/code_cicd.yaml
     permissions: 
       id-token: write
