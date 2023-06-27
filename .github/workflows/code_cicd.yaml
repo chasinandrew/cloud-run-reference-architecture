@@ -45,7 +45,7 @@ on:
 
 jobs:
   cloud-run-dev: 
-    # if: endsWith(github.ref, 'feature') || endsWith(github.ref, 'develop')
+    if: startsWith(github.head_ref, 'feature') || startsWith(github.ref_name, 'develop')
     name: "Image Build & Cloud Run Deploy DEV"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
@@ -97,7 +97,7 @@ jobs:
           envsubst < ./code/service-yaml/container-dev-qa.yaml > container-dev-qa.yaml
         
       - name: Deploy to Cloud Run to DEV
-        if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+        if: github.event_name == 'push'
         run: |- 
           gcloud run services replace container-dev-qa.yaml --region=${{ inputs.region }}
   
