@@ -102,6 +102,7 @@ jobs:
           gcloud run services replace container-dev-qa.yaml --region=${{ inputs.region }}
   
   cloud-run-prod: 
+    if: ${{ inputs.environment }} == 'prod'
     name: "Image Build & Cloud Run Deploy PROD"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
