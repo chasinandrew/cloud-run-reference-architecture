@@ -144,26 +144,26 @@ resource "random_password" "root-password" {
 }
 
 
-resource "google_pubsub_topic" "topic" {
-  name    = "secret-topic"
-  project = var.project_id
-}
+# resource "google_pubsub_topic" "topic" {
+#   name    = "secret-topic"
+#   project = var.project_id
+# }
 
-resource "google_pubsub_topic_iam_member" "member" {
-  project = var.project_id
-  topic   = google_pubsub_topic.topic.name
-  role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
-  depends_on = [
-    google_project_service_identity.sm_sa
-  ]
-}
+# resource "google_pubsub_topic_iam_member" "member" {
+#   project = var.project_id
+#   topic   = google_pubsub_topic.topic.name
+#   role    = "roles/pubsub.publisher"
+#   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
+#   depends_on = [
+#     google_project_service_identity.sm_sa
+#   ]
+# }
 
-resource "google_project_service_identity" "sm_sa" {
-  provider = google-beta
-  project  = data.google_project.project.project_id
-  service  = "secretmanager.googleapis.com"
-}
+# resource "google_project_service_identity" "sm_sa" {
+#   provider = google-beta
+#   project  = data.google_project.project.project_id
+#   service  = "secretmanager.googleapis.com"
+# }
 
 module "secret-manager" {
   source  = "./modules/secret-manager"
