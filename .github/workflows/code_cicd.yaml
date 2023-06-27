@@ -95,6 +95,12 @@ jobs:
           export DATABASE="${{ secrets.database }}"
           envsubst < ./code/service-yaml/container.yaml > container.yaml
         
-      - name: Deploy to Cloud Run
+      - name: Deploy to Cloud Run to DEV & QA
+        if: (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/qa') && github.event_name == 'push'
         run: |- 
-          gcloud run services replace container.yaml --region=${{ inputs.region }}
+          gcloud run services replace container-dev-qa.yaml --region=${{ inputs.region }}
+
+      - name: Deploy to Cloud Run to PROD
+        if: github.ref == 'refs/heads/prod' && github.event_name == 'push'
+        run: |- 
+          gcloud run services replace container-prod.yaml --region=${{ inputs.region }}
