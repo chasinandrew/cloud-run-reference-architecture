@@ -8,6 +8,14 @@ on:
     - 'develop'
     - 'qa'
     - 'main'
+  pull_request:
+    paths: 
+    - 'code/**'
+    branches:
+    - 'feature/**'
+    - 'develop'
+    - 'qa'
+    - 'main'
 
 jobs: 
   #TODO: add feature branch unit tests
