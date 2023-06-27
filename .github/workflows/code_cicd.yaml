@@ -45,7 +45,7 @@ on:
 
 jobs:
   cloud-run-dev: 
-    if: endsWith(github.ref, 'feature') || endsWith(github.ref, 'develop')
+    # if: endsWith(github.ref, 'feature') || endsWith(github.ref, 'develop')
     name: "Image Build & Cloud Run Deploy DEV"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
