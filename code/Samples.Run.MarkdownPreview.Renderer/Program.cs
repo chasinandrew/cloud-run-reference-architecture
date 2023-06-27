@@ -25,7 +25,7 @@ app.MapPost("/", async (HttpRequest request) =>
 {
     using var reader = new StreamReader(request.Body);
     var bodyString = await reader.ReadToEndAsync();
-    return Markdig.Markdown.ToHtml(bodyString); #
+    return Markdig.Markdown.ToHtml(bodyString); 
 });
 
 app.Run();
