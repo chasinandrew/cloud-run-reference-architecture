@@ -1,7 +1,7 @@
 # Cloud Run Deployment Pattern with Terraform Cloud & GitHub Actions
 This Cloud Run Deployment Pattern is designed for large enterprises with strict regulations and governance. It demonstrates how to deploy Terraform for infrastructure and maintain a separate workflow for application code. These pipelines are separate because application code will likely have a higher velocity of change than infrastructure. This separation also helps limit the potential impact of failures in CI/CD pipelines.
 
-## Terraform 
+## Terraform Workflow
 **The following information is specific to the Terraform workflow, please see towards the bottom for information specific to the application code workflow. The IaC should be executed first, hence the ordering.** 
 
 The actions that this repository will execute are: 
@@ -15,8 +15,8 @@ The actions that this repository will execute are:
 * Create an Artifact Registry repository to store Docker images. 
 * Create a serverless connector to route all Cloud Run traffic through.
 
-## Architecture Diagram
-### Terraform Deployment
+### Architecture Diagram
+#### Terraform Deployment
 ![alt text](./serverless-web-app.jpeg "Serverless Web Application Architecture")
 
 ## Prerequisites 
