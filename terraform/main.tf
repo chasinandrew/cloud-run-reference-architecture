@@ -50,6 +50,11 @@ resource "google_tags_location_tag_binding" "binding" {
   ]
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [ google_tags_location_tag_binding.binding ]
+  create_duration = "120s"
+}
+
 resource "google_cloud_run_service_iam_member" "noauth" {
   location = var.region
   project  = var.project_id
@@ -57,7 +62,8 @@ resource "google_cloud_run_service_iam_member" "noauth" {
   role    = "roles/run.invoker"
   member   = "allUsers"
   depends_on = [
-    data.google_cloud_run_service.container
+    data.google_cloud_run_service.container,
+    time_sleep.wait_120_seconds
   ]
 }
 
@@ -142,7 +148,6 @@ resource "random_password" "root-password" {
   length  = 8
   special = true
 }
-
 
 module "secret-manager" {
   source  = "./modules/secret-manager"
