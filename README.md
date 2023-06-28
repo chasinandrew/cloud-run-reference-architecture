@@ -49,7 +49,8 @@ This repository assumes that the below mentioned prerequisites are in place befo
 * roles/run.admin
 
 #### Roles Required on Specific Resources
-* roles/resourcemanager.tagUser is required on the tag key/value resource. 
+* roles/resourcemanager.tagUser 
+This is required on the tag key/value resource. 
 *Note: If this role is granted as a project role and the tags were created at the organization or folder level, the identity will not be able to use it. It is important to note to grant this role on the resource itself.* 
 
 
