@@ -17,10 +17,10 @@ The actions that this repository will execute are:
 
 ### Architecture Diagram
 #### Terraform Deployment
-![alt text](./serverless-web-app.jpeg "Serverless Web Application Architecture")
+![alt text](./images/serverless-web-app.jpeg "Serverless Web Application Architecture")
 
-#### Branching Strategy 
-#TODO 
+#### Terraform Branching Strategy 
+![alt text](./images/terraform-branching.jpeg "Terraform Branching Strategy")
 
 ### Prerequisites 
 #### Assumptions
