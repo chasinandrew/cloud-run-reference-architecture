@@ -55,11 +55,11 @@ This repository assumes that the below mentioned prerequisites are in place befo
 
 #### GitHub Secrets 
 The following GitHub secrets must be added to the repository. These secrets can be added per environment to ensure separation.  
-**TF_API_KEY** - Terraform API Key to authenticate from GitHub Actions to Terraform Cloud. 
-**WIF_SERVICE_ACCOUNT** - Workload Identity Federation connected Service Account. 
-**WIF_PROVIDER** - Workload Identity Federation provider fully qualified name. *e.g. projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider*
+* **TF_API_KEY**  Terraform API Key to authenticate from GitHub Actions to Terraform Cloud. 
+* **WIF_SERVICE_ACCOUNT**  Workload Identity Federation connected Service Account. 
+* **WIF_PROVIDER**  Workload Identity Federation provider fully qualified name. *e.g. projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider*
 
-#### Enable Required APIs
+#### Required APIs
 * artifactregistry.googleapis.com
 * monitoring.googleapis.com
 * run.googleapis.com
