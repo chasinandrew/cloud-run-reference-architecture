@@ -1,11 +1,11 @@
 module "gh_oidc_wif" {
-  source = "./modules/wif"
-  project_id = var.project_id
-  pool_id = "gh-push-auth-pool"
+  source      = "./modules/wif"
+  project_id  = var.project_id
+  pool_id     = "gh-push-auth-pool"
   provider_id = "gh-push-auth-provider"
   sa_mapping = {
     "gh-push" = {
-      sa_name = google_service_account.gh_sa.id
+      sa_name   = google_service_account.gh_sa.id
       attribute = "attribute.repository/user/repo"
     }
   }
@@ -15,26 +15,26 @@ module "gh_oidc_wif" {
   }
 }
 
-resource "google_service_account" "gh_sa" {
-  project = var.project_id
-  account_id = "gh-wif"
+resource "google_service_account" "gh_sa" { 
+  project      = var.project_id
+  account_id   = "gh-wif"
   display_name = "Service Account for auth to push container images and deploy Cloud Run containers."
-}
+} 
 
 resource "google_project_iam_binding" "ar_writer" {
-  project = var.project_id
-  role = "roles/artifactregistry.writer"
+  project = var.project_id #
+  role    = "roles/artifactregistry.writer" 
   members = [google_service_account.gh_sa.member]
 }
 
 resource "google_project_iam_binding" "run_admin" {
   project = var.project_id
-  role = "roles/run.admin"
+  role    = "roles/run.admin"
   members = [google_service_account.gh_sa.member]
 }
 
 resource "google_artifact_registry_repository" "docker_repo" {
-  project = var.project_id
+  project       = var.project_id
   location      = var.region
   repository_id = var.frontend_service_name
   description   = "Docker repository for container images."
@@ -50,11 +50,12 @@ resource "google_tags_location_tag_binding" "binding" {
   ]
 }
 
-resource "google_cloud_run_service_iam_policy" "noauth" {
-  location    = var.region
-  project     = var.project_id
-  service     = var.frontend_service_name
-  policy_data = data.google_iam_policy.noauth.policy_data
+resource "google_cloud_run_service_iam_member" "noauth" {
+  location = var.region
+  project  = var.project_id
+  service  = var.frontend_service_name
+  role    = "roles/run.invoker"
+  member   = "allUsers"
   depends_on = [
     data.google_cloud_run_service.container
   ]
@@ -82,8 +83,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
 module "external-lb-https" {
   source  = "./modules/external-lb"
   project = var.project_id
-  # labels     = local.labels
-  name = format("https-lb-%s", random_integer.sneg_id.result)
+  name    = format("https-lb-%s", random_integer.sneg_id.result)
   backends = {
     default = {
       description             = null
@@ -119,16 +119,21 @@ module "external-lb-https" {
 }
 
 module "mssql_db" {
-  source     = "./modules/mssql"
-  project_id = var.project_id
-  name       = "mssql"
-  region     = var.region
-  zone       = "us-east4-a"
+  source        = "./modules/mssql"
+  project_id    = var.project_id
+  name          = "mssql"
+  region        = var.region
+  zone          = "us-east4-a"
   root_password = random_password.root-password.result
   additional_users = [{
     name            = "sqlusertest"
     password        = ""
     random_password = true
+  }]
+  additional_databases = [{
+    name = var.database_name
+    collation = "SQL_Latin1_General_CP1_CI_AS"
+    charset = "UTF8"
   }]
   deletion_protection = false
 }
@@ -138,57 +143,51 @@ resource "random_password" "root-password" {
   special = true
 }
 
-resource "google_secret_manager_secret" "sqlpassword" {
-  project = data.google_project.project.number
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-  rotation {
-    rotation_period    = "31536000s"
-    next_rotation_time = timeadd("2023-05-08T17:00:00Z", "31536000s")
-  }
-  topics {
-    name = google_pubsub_topic.topic.id
-  }
 
-  secret_id = var.database_password_secret_name
-  # labels = module.tagging.metadata
-  depends_on = [
-    google_pubsub_topic_iam_member.member
+# resource "google_pubsub_topic" "topic" {
+#   name    = "secret-topic"
+#   project = var.project_id
+# }
+
+# resource "google_pubsub_topic_iam_member" "member" {
+#   project = var.project_id
+#   topic   = google_pubsub_topic.topic.name
+#   role    = "roles/pubsub.publisher"
+#   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
+#   depends_on = [
+#     google_project_service_identity.sm_sa
+#   ]
+# }
+
+# resource "google_project_service_identity" "sm_sa" {
+#   provider = google-beta
+#   project  = data.google_project.project.project_id
+#   service  = "secretmanager.googleapis.com"
+# }
+
+module "secret-manager" {
+  source  = "./modules/secret-manager"
+  project_id = var.project_id
+  secrets = [
+    {
+      name                     = "DB_PASSWORD"
+      automatic_replication    = true
+      secret_data              = random_password.root-password.result
+    },
+    {
+      name                     = "DB_USERNAME"
+      automatic_replication    = true
+      secret_data              = "sqlserver"
+    },
+    {
+      name                     = "DB_CONNECTION_STRING"
+      automatic_replication    = true
+      secret_data              = module.mssql_db.instance_connection_name
+    },
+    {
+      name                     = "DB_NAME"
+      automatic_replication    = true
+      secret_data              = var.database_name
+    },
   ]
-}
-
-resource "google_secret_manager_secret_version" "sqlpassword" {
-  enabled     = true
-  secret      = "projects/${data.google_project.project.number}/secrets/${var.database_password_secret_name}"
-  # secret_data = module.mssql_db.additional_users[0].password
-  secret_data = random_password.root-password.result
-  depends_on = [
-    google_secret_manager_secret.sqlpassword
-  ]
-}
-
-resource "google_pubsub_topic" "topic" {
-  name    = "secret-topic"
-  project = var.project_id
-}
-
-resource "google_pubsub_topic_iam_member" "member" {
-  project = var.project_id
-  topic   = google_pubsub_topic.topic.name
-  role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
-  depends_on = [
-    google_project_service_identity.sm_sa
-  ]
-}
-
-resource "google_project_service_identity" "sm_sa" {
-  provider = google-beta
-  project  = data.google_project.project.project_id
-  service  = "secretmanager.googleapis.com"
 }
