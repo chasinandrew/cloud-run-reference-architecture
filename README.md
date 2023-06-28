@@ -19,8 +19,10 @@ The actions that this repository will execute are:
 #### Terraform Deployment
 ![alt text](./serverless-web-app.jpeg "Serverless Web Application Architecture")
 
-### Prerequisites 
+#### Branching Strategy 
+#TODO 
 
+### Prerequisites 
 #### Assumptions
 This repository assumes that the below mentioned prerequisites are in place before consuming the module. 
 
@@ -34,7 +36,6 @@ This repository assumes that the below mentioned prerequisites are in place befo
 
 
 #### Project Roles Required for Terraform Service Account
-
 * roles/artifactregistry.admin
 * roles/cloudsql.admin
 * roles/instanceAdmin.v1
@@ -44,7 +45,6 @@ This repository assumes that the below mentioned prerequisites are in place befo
 * roles/artifactregsitry.admin 
 
 #### Project Roles Required for GitHub Workload Identity Service Account
-
 * roles/artifactregistry.writer
 * roles/run.admin
 
