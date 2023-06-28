@@ -1,21 +1,20 @@
 # Cloud Run Deployment Pattern with Terraform Cloud & GitHub Actions
-## Designed for larger enterprises in regulated environments
+This Cloud Run Deployment Pattern is designed for large enterprises with strict regulations and governance. It demonstrates how to deploy Terraform for infrastructure and maintain a separate workflow for application code. These pipelines are separate because application code will likely have a higher velocity of change than infrastructure. This separation also helps limit the potential impact of failures in CI/CD pipelines.
 
-This repository handles the basic deployment of containerized application on Cloud Run, along with a Global External Load Balancer and IAM for the service.
 
-The resources/services/activations/deletions that this module will create/trigger are: 
+The actions that this repository will execute are: 
 
-* Creates a Global External HTTPS load balancer in front of an existing Cloud Run service.  
-* Pulls a Terraform Data Source for Cloud Run. *NOTE: If a Cloud Run instance does not already exist, this repository can create a helloworld container on the fly in the GitHub Actions Workflow. This instance would then be replaced by your applications first revision.* 
-* Creates a Cloud SQL instance, SQL Server dialect, with relevant databases and stores connection information securely in Secret Manager. 
-* Applies a tag for excluding the Cloud Run service from Domain Restricted Sharing organization policy.
-* Applies the role grant on *allUsers* to have the *roles/run.invoker* role, allowing any user to invoke the Cloud Run service.
-* Creates an Artifact Registry repository to store Docker images. 
-* Creates a serverless connector to route all Cloud Run traffic through.
+* Create a Global External HTTPS load balancer in front of an existing Cloud Run service.  
+* Pull a Terraform Data Source for Cloud Run. *NOTE: If a Cloud Run instance does not already exist, this repository can create a helloworld container on the fly in the GitHub Actions Workflow. This instance would then be replaced by your applications first revision.* 
+* Create a Cloud SQL instance, SQL Server dialect, with relevant databases, public IP and private IP. 
+* Stores connection information securely in Secret Manager. 
+* Apply a tag for excluding the Cloud Run service from Domain Restricted Sharing organization policy.
+* Apply the role grant on *allUsers* to have the *roles/run.invoker* role, allowing any user to invoke the Cloud Run service.
+* Create an Artifact Registry repository to store Docker images. 
+* Create a serverless connector to route all Cloud Run traffic through.
 
 ## Architecture Diagram
 ![alt text](./serverless-web-app.jpeg "Serverless Web Application Architecture")
-
 
 ## Assumptions and Prerequisites 
 
