@@ -16,20 +16,21 @@ The actions that this repository will execute are:
 ## Architecture Diagram
 ![alt text](./serverless-web-app.jpeg "Serverless Web Application Architecture")
 
-## Assumptions and Prerequisites 
+## Prerequisites 
 
+### Assumptions
 This repository assumes that the below mentioned prerequisites are in place before consuming the module. 
 
 * All required APIs are enabled in the GCP Project.
 * Terraform workspace has been created and the team token is stored in Github secrets.
-* Workload Identity Federation has been set up 
+* Workload Identity Federation has been set up and the service account connected. 
 * A Shared VPC exists and the project where these resources will be deployed is a *service project*. 
 * The /modules folder mimics the private module registry available for enterprise organizations. This is meant to emulate the clone & own strategy some enterprises follow with respect to open source modules. 
 * /28 subnet has been shared with service project.
 * The service account that will deploy all resources through Terraform has the roles mentioned in the following section.
 
 
-## Project Roles Required for Terraform Service Account
+### Project Roles Required for Terraform Service Account
 
 * roles/artifactregistry.admin
 * roles/cloudsql.admin
@@ -39,15 +40,20 @@ This repository assumes that the below mentioned prerequisites are in place befo
 * roles/iam.workloadIdentityPoolAdmin
 * roles/artifactregsitry.admin 
 
+### Project Roles Required for GitHub Workload Identity Service Account
+
+* roles/artifactregistry.writer
+* roles/run.admin
+
 ### Roles Required on Specific Resources
 * roles/resourcemanager.tagUser is required on the tag key/value resource. 
 *Note: If this role is granted as a project role and the tags were created at the organization or folder level, the identity will not be able to use it. It is important to note to grant this role on the resource itself.* 
 
 
-## GitHub Secrets 
+### GitHub Secrets 
+The following GitHub
 
-
-## Required APIs
+### Enable Required APIs
 * artifactregistry.googleapis.com
 * monitoring.googleapis.com
 * run.googleapis.com
