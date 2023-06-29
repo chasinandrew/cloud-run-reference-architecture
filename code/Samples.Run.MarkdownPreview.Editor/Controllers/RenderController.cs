@@ -61,5 +61,5 @@ public class RenderController : Controller
         
         return await upstreamResponse.Content.ReadAsStringAsync();
     }
-    // [END cloudrun_secure_request]
+    // [END cloudrun_secure_request] //
 }

@@ -22,7 +22,7 @@ resource "google_service_account" "gh_sa" {
 } 
 
 resource "google_project_iam_binding" "ar_writer" {
-  project = var.project_id #
+  project = var.project_id 
   role    = "roles/artifactregistry.writer" 
   members = [google_service_account.gh_sa.member]
 }
@@ -50,6 +50,11 @@ resource "google_tags_location_tag_binding" "binding" {
   ]
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [ google_tags_location_tag_binding.binding ]
+  create_duration = "120s"
+}
+
 resource "google_cloud_run_service_iam_member" "noauth" {
   location = var.region
   project  = var.project_id
@@ -57,7 +62,8 @@ resource "google_cloud_run_service_iam_member" "noauth" {
   role    = "roles/run.invoker"
   member   = "allUsers"
   depends_on = [
-    data.google_cloud_run_service.container
+    data.google_cloud_run_service.container,
+    time_sleep.wait_120_seconds
   ]
 }
 
@@ -143,28 +149,6 @@ resource "random_password" "root-password" {
   special = true
 }
 
-
-# resource "google_pubsub_topic" "topic" {
-#   name    = "secret-topic"
-#   project = var.project_id
-# }
-
-# resource "google_pubsub_topic_iam_member" "member" {
-#   project = var.project_id
-#   topic   = google_pubsub_topic.topic.name
-#   role    = "roles/pubsub.publisher"
-#   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
-#   depends_on = [
-#     google_project_service_identity.sm_sa
-#   ]
-# }
-
-# resource "google_project_service_identity" "sm_sa" {
-#   provider = google-beta
-#   project  = data.google_project.project.project_id
-#   service  = "secretmanager.googleapis.com"
-# }
-
 module "secret-manager" {
   source  = "./modules/secret-manager"
   project_id = var.project_id
@@ -180,7 +164,7 @@ module "secret-manager" {
       secret_data              = "sqlserver"
     },
     {
-      name                     = "DB_CONNECTION_STRING"
+      name                     = "DB_CONNECTION_NAME"
       automatic_replication    = true
       secret_data              = module.mssql_db.instance_connection_name
     },
