@@ -29,7 +29,11 @@ on:
         type: string 
         required: true  
         description: Cloud Run region for deployment. 
-      
+      terraform_org: 
+        type: string 
+        required: true
+        description: Terraform organization where the workspace resides. 
+
 
 jobs:
   terraform: 
