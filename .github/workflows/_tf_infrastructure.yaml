@@ -91,15 +91,17 @@ jobs:
         run: terraform plan -no-color -input=false -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
         working-directory: ${{ inputs.working_directory }}
 
-      # - name: Terraform Plan QA
-      #   id: plan_qa
-      #   run: terraform plan -no-color -input=false -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
-      #   working-directory: ${{ inputs.working_directory }}
+      - name: Terraform Plan QA
+        if: ${{ inputs.environment }} == 'qa-iac'
+        id: plan_qa
+        run: terraform plan -no-color -input=false -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        working-directory: ${{ inputs.working_directory }}
 
-      # - name: Terraform Plan PROD
-      #   id: plan_prod
-      #   run: terraform plan -no-color -input=false -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
-      #   working-directory: ${{ inputs.working_directory }}
+      - name: Terraform Plan PROD
+        if: ${{ inputs.environment }} == 'main-iac'
+        id: plan_prod
+        run: terraform plan -no-color -input=false -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
