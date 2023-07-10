@@ -21,6 +21,14 @@ on:
         type: string 
         required: true 
         description: Terraform workspace name.
+      project_id:
+        type: string
+        required: true
+        description: GCP Project ID.
+      region: 
+        type: string 
+        required: true  
+        description: Cloud Run region for deployment. 
 
 jobs:
   terraform: 
@@ -49,7 +57,7 @@ jobs:
       - name: Deploy to Cloud Run 
         if: ${{ inputs.first_run }} == true
         run: |- 
-          gcloud run deploy ${{ env.CONTAINER_SERVICE }} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+          gcloud run deploy ${{ inputs.service_name }} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ inputs.project_id }} --region ${{ inputs.region }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
