@@ -19,7 +19,7 @@ on:
 
 env: 
   WORKING_DIRECTORY: ./terraform
-  SERVICE_NAME: pods
+  SERVICE_NAME: hello
 
 jobs:
   terraform: 

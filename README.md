@@ -1,36 +1,66 @@
-# Cloud Run Deployment Pattern with Terraform Cloud & GitHub Actions 
+# Cloud Run Deployment Pattern with Terraform Cloud & GitHub Actions
+This Cloud Run Deployment Pattern is designed for large enterprises with strict regulations and governance. It demonstrates how to deploy Terraform for infrastructure and maintain a separate workflow for application code. These pipelines are separate because application code will likely have a higher velocity of change than infrastructure. This separation also helps limit the potential impact of failures in CI/CD pipelines.
 
-This repository handles the basic deployment of containerized application on Cloud Run, along with a Global External Load Balancer and IAM for the service.
+## Terraform Workflow
+**The following information is specific to the Terraform workflow, please see towards the bottom for information specific to the application code workflow. The IaC should be executed first, hence the ordering.** 
 
-The resources/services/activations/deletions that this module will create/trigger are: 
+The actions that this repository will execute are: 
 
-* Creates a Cloud Run service with provided name, application code and optional parameters for the container
-* Creates a Global HTTPS load balancer with a Google-managed SSL certificate, forwarding rule, URL map and serverless network endpoint group
-* Applies a tag for excluding the Cloud Run service from Domain Restricted Sharing organization policy
-* Creates a Cloud Storage bucket if needed within your application 
-* Prepares Cloud Run instance for connection to Cloud SQL instances with environment variables and Secrets Manager
-* Deployment pipeline facilitates the container image build and push to Artifact Registry
+* Create a Global External HTTPS load balancer in front of an existing Cloud Run service.  
+* Pull a Terraform Data Source for Cloud Run. *NOTE: If a Cloud Run instance does not already exist, this repository can create a helloworld container on the fly in the GitHub Actions Workflow. This instance would then be replaced by your applications first revision.* 
+* Create a Cloud SQL instance, SQL Server dialect, with relevant databases, public IP and private IP. 
+* Stores connection information securely in Secret Manager. 
+* Apply a tag for excluding the Cloud Run service from Domain Restricted Sharing organization policy.
+* Apply the role grant on *allUsers* to have the *roles/run.invoker* role, allowing any user to invoke the Cloud Run service.
+* Create an Artifact Registry repository to store Docker images. 
+* Create a serverless connector to route all Cloud Run traffic through.
 
-## Architecture Diagram
-![alt text](./architecture-diagram.jpg "Serverless Web App")
+### Architecture Diagrams
+#### Terraform Deployment
+![alt text](./images/serverless-web-app.jpeg "Serverless Web Application Architecture")
 
+#### Terraform Branching Strategy 
+![alt text](./images/terraform-branching.jpeg "Terraform Branching Strategy")
 
-## Assumptions and Prerequisites 
-
+### Prerequisites 
+#### Assumptions
 This repository assumes that the below mentioned prerequisites are in place before consuming the module. 
 
-* All required APIs are enabled in the GCP Project
-* Terraform workspace has been created and the team token is stored in Github secrets
-* Workload Identity Federation is configured for the service account to authenticate from Github and Terraform Cloud
-* Github secrets are created for **TF_API_TOKEN**, **WIF_PROVIDER**, **WIF_SA**
-* Artifact Registry repository has been created
-* Static external IP address has been reserved 
-* DNS A record has been created with the external IP address and domain name to be used for Cloud Run 
-* Cloud SQL (optional) 
-* VPC Connector in the Shared VPC network host project (optional)
-* Secrets created and stored in Secrets Manager or HashiCorp Vault (optional)
+* All required APIs are enabled in the GCP Project.
+* Terraform workspace has been created and the team token is stored in Github secrets.
+* Workload Identity Federation has been set up and the service account connected. 
+* A Shared VPC exists and the project where these resources will be deployed is a *service project*. 
+* The /modules folder mimics the private module registry available for enterprise organizations. This is meant to emulate the clone & own strategy some enterprises follow with respect to open source modules. 
+* /28 subnet has been shared with service project.
+* The service account that will deploy all resources through Terraform has the roles mentioned in the following section.
 
-## Required APIs
+
+#### Project Roles Required for Terraform Service Account
+* roles/artifactregistry.admin
+* roles/cloudsql.admin
+* roles/instanceAdmin.v1
+* roles/iam.projectIamAdmin
+* roles/compute.loadBalancerAdmin
+* roles/iam.workloadIdentityPoolAdmin
+* roles/artifactregsitry.admin 
+
+#### Project Roles Required for GitHub Workload Identity Service Account
+* roles/artifactregistry.writer
+* roles/run.admin
+
+#### Roles Required on Specific Resources
+* roles/resourcemanager.tagUser 
+*Note: If this role is granted as a project role and the tags were created at the organization or folder level, the identity will not be able to use it. It is important to note to grant this role on the resource itself.* 
+
+
+#### GitHub Secrets 
+The following GitHub secrets must be added to the repository. These secrets can be added per environment to ensure separation.  
+* **TF_API_KEY** - Terraform API Key to authenticate from GitHub Actions to Terraform Cloud. 
+* **WIF_PROVIDER** - Workload Identity Federation provider fully qualified name. *e.g. projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider*
+* **WIF_SERVICE_ACCOUNT** - Workload Identity Federation connected Service Account. 
+
+
+#### Required APIs
 * artifactregistry.googleapis.com
 * monitoring.googleapis.com
 * run.googleapis.com
@@ -49,18 +79,10 @@ This repository assumes that the below mentioned prerequisites are in place befo
 * cloudresourcemanager.googleapis.com
 
 
-## Permissions Required for Terraform Service Account
-
-* roles/artifactregistry.admin
-* roles/cloudsql.admin
-* roles/instanceAdmin.v1
-* roles/iam.projectIamAdmin
-* roles/compute.loadBalancerAdmin
-* roles/iam.workloadIdentityPoolAdmin
-* roles/artifactregsitry.writer 
-* roles/resourcemanager.tagUser
-
-
-## How to use this repository
-
+## How to use this repository to deploy infrastructure
+### General Repository Usage
+1. Fork this repository or copy the code into your own repository. 
+2. 
+### Terraform Deployment
+1. 
 
