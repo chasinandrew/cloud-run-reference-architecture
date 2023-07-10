@@ -16,15 +16,15 @@ module "gh_oidc_wif" {
   }
 }
 
-resource "google_service_account" "gh_sa" { 
+resource "google_service_account" "gh_sa" {
   project      = var.project_id
   account_id   = "gh-wif"
   display_name = "Service Account for auth to push container images and deploy Cloud Run containers."
-} 
+}
 
 resource "google_project_iam_binding" "ar_writer" {
-  project = var.project_id 
-  role    = "roles/artifactregistry.writer" 
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
   members = [google_service_account.gh_sa.member]
 }
 
@@ -52,7 +52,7 @@ resource "google_tags_location_tag_binding" "binding" {
 }
 
 resource "time_sleep" "wait_120_seconds" {
-  depends_on = [ google_tags_location_tag_binding.binding ]
+  depends_on      = [google_tags_location_tag_binding.binding]
   create_duration = "120s"
 }
 
@@ -60,7 +60,7 @@ resource "google_cloud_run_service_iam_member" "noauth" {
   location = var.region
   project  = var.project_id
   service  = var.frontend_service_name
-  role    = "roles/run.invoker"
+  role     = "roles/run.invoker"
   member   = "allUsers"
   depends_on = [
     data.google_cloud_run_service.container,
@@ -141,9 +141,9 @@ module "mssql_db" {
     random_password = true
   }]
   additional_databases = [{
-    name = var.database_name
+    name      = var.database_name
     collation = "SQL_Latin1_General_CP1_CI_AS"
-    charset = "UTF8"
+    charset   = "UTF8"
   }]
   deletion_protection = false
 }
@@ -154,28 +154,28 @@ resource "random_password" "root-password" {
 }
 
 module "secret-manager" {
-  source  = "./modules/secret-manager"
+  source     = "./modules/secret-manager"
   project_id = var.project_id
   secrets = [
     {
-      name                     = "DB_ROOT_PASSWORD"
-      automatic_replication    = true
-      secret_data              = random_password.root-password.result
+      name                  = "DB_ROOT_PASSWORD"
+      automatic_replication = true
+      secret_data           = random_password.root-password.result
     },
     {
-      name                     = "DB_ROOT_USERNAME"
-      automatic_replication    = true
-      secret_data              = "sqlserver"
+      name                  = "DB_ROOT_USERNAME"
+      automatic_replication = true
+      secret_data           = "sqlserver"
     },
     {
-      name                     = "DB_CONNECTION_NAME"
-      automatic_replication    = true
-      secret_data              = module.mssql_db.instance_connection_name
+      name                  = "DB_CONNECTION_NAME"
+      automatic_replication = true
+      secret_data           = module.mssql_db.instance_connection_name
     },
     {
-      name                     = "DB_NAME"
-      automatic_replication    = true
-      secret_data              = var.database_name
+      name                  = "DB_NAME"
+      automatic_replication = true
+      secret_data           = var.database_name
     },
   ]
 }
