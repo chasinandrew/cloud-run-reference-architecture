@@ -74,7 +74,7 @@ jobs:
 
       - name: Terraform Plan QA
         id: plan_qa
-        if: github.head_ref == 'refs/heads/qa-iac' && github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/develop-iac' && github.head_ref =='refs/heads/qa-iac'
         run: terraform plan -no-color -input=false -var-file=envs/qa/qa.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
