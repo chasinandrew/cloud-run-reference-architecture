@@ -86,7 +86,7 @@ jobs:
 
 
       ## Terraform Plan All ENVs
-      - name: Terraform Plan DEV
+      - name: Terraform Plan
         id: plan_dev
         run: terraform plan -no-color -input=false -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
         working-directory: ${{ inputs.working_directory }}
