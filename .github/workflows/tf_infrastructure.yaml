@@ -21,6 +21,7 @@ jobs:
   dev:
     uses: ./.github/workflows/_tf_infrastructure.yaml
     permissions: 
+      actions: read
       id-token: write
       contents: read
     with: 
