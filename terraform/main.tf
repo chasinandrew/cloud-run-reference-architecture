@@ -81,6 +81,9 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
   cloud_run {
     service = data.google_cloud_run_service.container.name
   }
+  lifecycle {
+    create_before_destroy = true
+  }
   depends_on = [
     random_integer.sneg_id,
     data.google_cloud_run_service.container
