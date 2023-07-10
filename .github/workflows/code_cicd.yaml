@@ -1,0 +1,159 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+        description: Name of the target deployment environment. Acceptable values are 'dev', 'qa', or 'prod'.
+      ref:  
+        type: string
+        required: true
+        description: The branch, tag or SHA to checkout.
+      enable:
+        type: boolean
+        required: false
+        default: true
+        description: Whether or not to perform the actual deployment. The default value is true, or perform the deployment.
+      gcp_project_id:
+        type: string
+        required: true
+        description: The Google Cloud project ID.
+      artifact_registry_repo:
+        type: string
+        required: true
+        description: The artifact registry repository name.
+      region:
+        type: string
+        required: true
+        description: The artifact registry region name.
+      docker_image_name:
+        type: string
+        required: true
+        description: The container image name.
+      service_name:
+        type: string
+        required: true
+        description: The container service name.
+      code_directory: 
+        type: string
+        required: true
+        description: The directory where the source code lives. 
+      cloud_run_sa: 
+        type: string
+        required: false
+        description: The directory where the source code lives. 
+
+jobs:
+  cloud-run-dev: 
+    # if: startsWith(github.head_ref, 'feature') || startsWith(github.ref_name, 'develop') #
+    name: "Image Build & Cloud Run Deploy DEV"
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+
+      # Authenticate Docker to Google Cloud Artifact Registry #
+      - name: Docker Auth
+        id: docker-auth
+        uses: 'docker/login-action@v1'
+        with:
+          username: 'oauth2accesstoken'
+          password: '${{ steps.auth.outputs.access_token }}'
+          registry: '${{ inputs.region }}-docker.pkg.dev'
+
+      - name: Build and Tag
+        id: build-image
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.code_directory }}
+          push: true 
+          tags: ${{ inputs.region }}-docker.pkg.dev/${{ inputs.gcp_project_id }}/${{ inputs.artifact_registry_repo }}/${{ inputs.service_name }}:${{ inputs.ref }}
+      
+      - name: Docker Push
+        run: |-
+          docker push "${{ inputs.region }}-docker.pkg.dev/${{ inputs.gcp_project_id }}/${{ inputs.artifact_registry_repo }}/${{ inputs.service_name }}:${{ inputs.ref }}"
+
+      - name: Create Service declaration   
+        run: |-
+          export CONTAINER_IMAGE="${{ inputs.region }}-docker.pkg.dev/${{ inputs.gcp_project_id }}/${{ inputs.artifact_registry_repo }}/${{ inputs.service_name }}:${{ inputs.ref }}"
+          export SERVICE_NAME="${{ inputs.service_name }}"
+          export PROJECT_ID="${{ inputs.gcp_project_id }}"
+          export REVISION_TAG="${{ inputs.ref }}"
+          export CLOUD_RUN_SA="${{ inputs.cloud_run_sa }}"
+          export DATABASE="${{ secrets.database }}"
+          envsubst < ./code/service-yaml/container-dev-qa.yaml > container-dev-qa.yaml
+        
+      - name: Deploy to Cloud Run to DEV
+        if: github.event_name == 'push'
+        run: |- 
+          gcloud run services replace container-dev-qa.yaml --region=${{ inputs.region }}
+  
+  cloud-run-prod: 
+    if: startsWith(github.ref, 'prod')
+    name: "Image Build & Cloud Run Deploy PROD"
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+
+      # Authenticate Docker to Google Cloud Artifact Registry #
+      - name: Docker Auth
+        id: docker-auth
+        uses: 'docker/login-action@v1'
+        with:
+          username: 'oauth2accesstoken'
+          password: '${{ steps.auth.outputs.access_token }}'
+          registry: '${{ inputs.region }}-docker.pkg.dev'
+
+      - name: Build and Tag
+        id: build-image
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.code_directory }}
+          push: true 
+          tags: ${{ inputs.region }}-docker.pkg.dev/${{ inputs.gcp_project_id }}/${{ inputs.artifact_registry_repo }}/${{ inputs.service_name }}:${{ inputs.ref }}
+      
+      - name: Docker Push
+        run: |-
+          docker push "${{ inputs.region }}-docker.pkg.dev/${{ inputs.gcp_project_id }}/${{ inputs.artifact_registry_repo }}/${{ inputs.service_name }}:${{ inputs.ref }}"
+
+      - name: Create Service declaration   
+        run: |-
+          export CONTAINER_IMAGE="${{ inputs.region }}-docker.pkg.dev/${{ inputs.gcp_project_id }}/${{ inputs.artifact_registry_repo }}/${{ inputs.service_name }}:${{ inputs.ref }}"
+          export SERVICE_NAME="${{ inputs.service_name }}"
+          export PROJECT_ID="${{ inputs.gcp_project_id }}"
+          export REVISION_TAG="${{ inputs.ref }}"
+          export CLOUD_RUN_SA="${{ inputs.cloud_run_sa }}"
+          export DATABASE="${{ secrets.database }}"
+          envsubst < ./code/service-yaml/container-prod.yaml > container-prod.yaml
+
+      - name: Deploy to Cloud Run to prod
+        if: github.event_name == 'push'
+        run: |- 
+          gcloud run services replace container-prod.yaml --region=${{ inputs.region }}

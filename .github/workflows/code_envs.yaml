@@ -1,0 +1,74 @@
+name: CLOUD RUN WORKFLOW BUILD AND DEPLOY
+on:
+  push:
+    paths: 
+    - 'code/**'
+    branches:
+    - 'feature/**'
+    - 'develop'
+    - 'qa'
+    - 'main'
+  pull_request:
+    paths: 
+    - 'code/**'
+    branches:
+    - 'feature/**'
+    - 'develop'
+    - 'qa'
+    - 'main'
+
+jobs: 
+  #DEV
+  dev:
+    if: startsWith(github.head_ref, 'feature') || startsWith(github.ref_name, 'feature')
+    uses: ./.github/workflows/code_cicd.yaml
+    permissions: 
+      id-token: write
+      contents: read
+    with: 
+      environment: dev
+      ref: ${{ github.sha }}
+      gcp_project_id: arched-inkwell-368821
+      artifact_registry_repo: reference-architectures
+      region: us-east4
+      docker_image_name: pods
+      service_name: hello 
+      code_directory: ./code/Samples.Run.MarkdownPreview.Editor
+      cloud_run_sa: cloud-run-sa
+    secrets: inherit
+  
+  #QA
+  qa:
+    if: startsWith(github.ref_name, 'qa')
+    uses: ./.github/workflows/code_cicd.yaml
+    permissions: 
+      id-token: write
+      contents: read
+    with: 
+      environment: qa
+      ref: ${{ github.sha }}
+      gcp_project_id: arched-inkwell-368821
+      artifact_registry_repo: reference-architectures
+      region: us-east4
+      docker_image_name: pods
+      service_name: hello
+      code_directory: ./code/Samples.Run.MarkdownPreview.Editor
+    secrets: inherit
+  
+  #PROD
+  prod: 
+    if: startsWith(github.ref_name, 'main')
+    uses: ./.github/workflows/code_cicd.yaml
+    permissions: 
+      id-token: write
+      contents: read
+    with: 
+      environment: prod
+      ref: ${{ github.sha }}
+      gcp_project_id: arched-inkwell-368821
+      artifact_registry_repo: reference-architectures
+      region: us-east4
+      docker_image_name: pods
+      service_name: hello
+      code_directory: ./code/Samples.Run.MarkdownPreview.Editor
+    secrets: inherit
