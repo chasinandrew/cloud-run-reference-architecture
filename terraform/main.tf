@@ -76,7 +76,7 @@ resource "random_integer" "sneg_id" {
 resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
   name                  = format("sneg-%s", var.project_id)
   project               = var.project_id
-  network_endpoint_type = "SERVERLESS"
+  network_endpoint_type = "SERVERLESS" #
   region                = var.region
   cloud_run {
     service = data.google_cloud_run_service.container.name
