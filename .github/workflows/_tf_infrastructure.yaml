@@ -1,33 +1,113 @@
-name: PLAN AND APPLY TERRAFORM
 on:
-  push:
-    paths: 
-    - 'terraform/**'
-    branches:
-    - 'feature/**'
-    - 'develop-iac'
-    - 'qa-iac'
-    - 'main-iac'
-  pull_request:
-    paths: 
-    - 'terraform/**'
-    branches:
-    - 'feature/**'
-    - 'develop-iac'
-    - 'qa-iac'
-    - 'main-iac'
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+        description: Name of the target deployment environment. Acceptable values are 'dev', 'qa', or 'prod'.
+      working_directory:
+        type: string
+        required: true
+        description: Working directory of Terraform code. 
+      service_name: 
+        type: string 
+        required: true
+        description: Service name of Cloud Run instance. 
+      first_run: 
+        type: string 
+        required: false
+        description: Flag to specify whether this is the first run of the workflow. If it is, it will create a new helloworld cloud run instance. 
+      workspace_name: 
+        type: string 
+        required: true 
+        description: Terraform workspace name.
 
 jobs:
-  dev:
-    uses: ./.github/workflows/_tf_infrastructure.yaml
-    permissions: 
+  terraform: 
+    name: "Terraform Deployment"
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env: 
+      TF_WORKSPACE: ${{ inputs.workspace_name }}
+    permissions:
+      actions: read
       id-token: write
       contents: read
-    with: 
-      environment: dev
-      working_directory: ./terraform
-      service_name: hello
-      first_run: false
-      workspace_name: cloud-run-reference-architecture
-    secrets: inherit
-  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+
+      #TODO: REMOVE AFTER FIRST RUN
+      - name: Deploy to Cloud Run 
+        if: ${{ inputs.first_run }} == true
+        run: |- 
+          gcloud run deploy ${{ env.CONTAINER_SERVICE }} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_KEY }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt 
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ${{ inputs.working_directory }}
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ${{ inputs.working_directory }}
+
+
+      ## Terraform Plan All ENVs
+      - name: Terraform Plan DEV
+        id: plan_dev
+        run: terraform plan -no-color -input=false -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        working-directory: ${{ inputs.working_directory }}
+
+      # - name: Terraform Plan QA
+      #   id: plan_qa
+      #   run: terraform plan -no-color -input=false -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+      #   working-directory: ${{ inputs.working_directory }}
+
+      # - name: Terraform Plan PROD
+      #   id: plan_prod
+      #   run: terraform plan -no-color -input=false -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+      #   working-directory: ${{ inputs.working_directory }}
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      ## Terraform Apply DEV
+      - name: Terraform Apply DEV
+        if: github.ref == 'refs/heads/develop-iac' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        working-directory: ${{ inputs.working_directory }}
+      
+      ## Terraform Apply QA
+      - name: Terraform Apply QA
+        if: github.ref == 'refs/heads/qa-iac' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=envs/qa/qa.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        working-directory: ${{ inputs.working_directory }}
+
+      ## Terraform Apply PROD
+      - name: Terraform Apply PROD
+        if: github.ref == 'refs/heads/main-iac' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=envs/prod/prod.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        working-directory: ${{ inputs.working_directory }}
+        
+
+
