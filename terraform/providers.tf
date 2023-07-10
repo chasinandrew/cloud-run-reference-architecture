@@ -7,9 +7,6 @@ terraform {
     }
   }
   cloud {
-    organization = "google-testing-org"
-    workspaces {
-      name = "cloud-run-reference-architecture"
-    }
+  
   }
 }
