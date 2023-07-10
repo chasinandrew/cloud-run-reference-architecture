@@ -18,10 +18,9 @@ on:
     - 'main'
 
 jobs: 
-
   #DEV
   dev:
-    if: startsWith(github.head_ref, 'feature')
+    if: startsWith(github.head_ref, 'feature') || startsWith(github.ref_name, 'feature')
     uses: ./.github/workflows/code_cicd.yaml
     permissions: 
       id-token: write
@@ -33,7 +32,7 @@ jobs:
       artifact_registry_repo: reference-architectures
       region: us-east4
       docker_image_name: pods
-      service_name: pods 
+      service_name: hello 
       code_directory: ./code/Samples.Run.MarkdownPreview.Editor
       cloud_run_sa: cloud-run-sa
     secrets: inherit
@@ -52,7 +51,7 @@ jobs:
       artifact_registry_repo: reference-architectures
       region: us-east4
       docker_image_name: pods
-      service_name: pods
+      service_name: hello
       code_directory: ./code/Samples.Run.MarkdownPreview.Editor
     secrets: inherit
   
@@ -70,6 +69,6 @@ jobs:
       artifact_registry_repo: reference-architectures
       region: us-east4
       docker_image_name: pods
-      service_name: pods
+      service_name: hello
       code_directory: ./code/Samples.Run.MarkdownPreview.Editor
     secrets: inherit
