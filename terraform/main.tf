@@ -1,3 +1,4 @@
+
 module "gh_oidc_wif" {
   source      = "./modules/wif"
   project_id  = var.project_id
@@ -154,12 +155,12 @@ module "secret-manager" {
   project_id = var.project_id
   secrets = [
     {
-      name                     = "DB_PASSWORD"
+      name                     = "DB_ROOT_PASSWORD"
       automatic_replication    = true
       secret_data              = random_password.root-password.result
     },
     {
-      name                     = "DB_USERNAME"
+      name                     = "DB_ROOT_USERNAME"
       automatic_replication    = true
       secret_data              = "sqlserver"
     },

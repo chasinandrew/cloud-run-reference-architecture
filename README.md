@@ -15,7 +15,7 @@ The actions that this repository will execute are:
 * Create an Artifact Registry repository to store Docker images. 
 * Create a serverless connector to route all Cloud Run traffic through.
 
-### Architecture Diagram
+### Architecture Diagrams
 #### Terraform Deployment
 ![alt text](./images/serverless-web-app.jpeg "Serverless Web Application Architecture")
 
