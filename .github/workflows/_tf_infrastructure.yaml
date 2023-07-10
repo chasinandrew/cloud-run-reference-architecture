@@ -29,6 +29,7 @@ on:
         type: string 
         required: true  
         description: Cloud Run region for deployment. 
+      
 
 jobs:
   terraform: 
@@ -37,6 +38,7 @@ jobs:
     environment: ${{ inputs.environment }}
     env: 
       TF_WORKSPACE: ${{ inputs.workspace_name }}
+      TF_CLOUD_ORGANIZATION: ${{ inputs.terraform_org }}
     permissions:
       actions: read
       id-token: write

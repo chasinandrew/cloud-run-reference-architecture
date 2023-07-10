@@ -30,6 +30,7 @@ jobs:
       service_name: hello
       first_run: false
       workspace_name: cloud-run-reference-architecture
+      terraform_org: google-testing-org
       project_id: arched-inkwell-368821
       region: us-east4
     secrets: inherit
