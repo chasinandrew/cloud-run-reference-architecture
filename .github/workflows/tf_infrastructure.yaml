@@ -35,7 +35,7 @@ jobs:
       region: us-east4
     secrets: inherit
   qa:
-    if: github.ref == 'develop-iac'
+    if: github.head_ref == 'develop-iac'
     uses: ./.github/workflows/_tf_infrastructure.yaml
     permissions: 
       actions: read
