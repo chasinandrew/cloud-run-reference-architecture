@@ -25,7 +25,7 @@ jobs:
       id-token: write
       contents: read
     with: 
-      environment: dev
+      environment: dev-iac
       working_directory: ./terraform
       service_name: hello
       first_run: false
@@ -41,7 +41,7 @@ jobs:
       id-token: write
       contents: read
     with: 
-      environment: qa
+      environment: qa-iac
       working_directory: ./terraform
       service_name: hello
       first_run: false
