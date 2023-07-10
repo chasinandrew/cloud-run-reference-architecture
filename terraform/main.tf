@@ -88,7 +88,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
     random_integer.sneg_id,
     data.google_cloud_run_service.container
   ]
-} #
+} 
 
 module "external-lb-https" {
   source  = "./modules/external-lb"
