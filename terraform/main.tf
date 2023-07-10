@@ -74,7 +74,7 @@ resource "random_integer" "sneg_id" {
 }
 
 resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
-  name                  = format("sneg-%s", random_integer.sneg_id.result)
+  name                  = format("sneg-%s", var.project_id)
   project               = var.project_id
   network_endpoint_type = "SERVERLESS"
   region                = var.region
@@ -93,7 +93,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
 module "external-lb-https" {
   source  = "./modules/external-lb"
   project = var.project_id
-  name    = format("https-lb-%s", random_integer.sneg_id.result)
+  name    = format("https-lb-%s", var.project_id)
   backends = {
     default = {
       description             = null
