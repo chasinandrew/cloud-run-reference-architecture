@@ -92,7 +92,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Plan QA
-        if: ${{ inputs.environment }} == 'qa-iac'
+        if: ${{ inputs.environment == 'qa-iac' }} 
         id: plan_qa
         run: terraform plan -no-color -input=false -var-file=envs/qa/qa.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
         working-directory: ${{ inputs.working_directory }}
