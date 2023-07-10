@@ -25,7 +25,7 @@ jobs:
       id-token: write
       contents: read
     with: 
-      environment: dev
+      environment: dev-iac
       working_directory: ./terraform
       service_name: hello
       first_run: false
@@ -35,13 +35,14 @@ jobs:
       region: us-east4
     secrets: inherit
   qa:
+    if: github.ref == 'develop-iac'
     uses: ./.github/workflows/_tf_infrastructure.yaml
     permissions: 
       actions: read
       id-token: write
       contents: read
     with: 
-      environment: qa
+      environment: qa-iac
       working_directory: ./terraform
       service_name: hello
       first_run: false
