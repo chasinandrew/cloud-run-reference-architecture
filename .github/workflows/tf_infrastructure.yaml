@@ -19,6 +19,7 @@ on:
 
 jobs:
   dev:
+    if: github.head_ref != 'develop-iac' || github.head_ref != 'qa-iac'
     uses: ./.github/workflows/_tf_infrastructure.yaml
     permissions: 
       actions: read
