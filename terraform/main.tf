@@ -17,10 +17,10 @@ module "gh_oidc_wif" {
 }
 
 resource "google_cloud_run_v2_service" "default" {
-  name     = var.frontend_service_name
+  name     = "placeholder"
   location = var.region
-  project = var.project_id
-  ingress = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+  project  = var.project_id
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
 
   template {
     containers {
@@ -89,10 +89,10 @@ resource "random_integer" "sneg_id" {
 resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
   name                  = format("sneg-%s-%s", var.project_id, random_integer.sneg_id.result)
   project               = var.project_id
-  network_endpoint_type = "SERVERLESS" 
-  region                = var.region 
+  network_endpoint_type = "SERVERLESS"
+  region                = var.region
   cloud_run {
-    service = data.google_cloud_run_service.container.name
+    service = coalesce(data.google_cloud_run_service.container_first_run, data.google_cloud_run_service.container.name)
   }
   lifecycle {
     create_before_destroy = true
@@ -101,7 +101,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
     random_integer.sneg_id,
     data.google_cloud_run_service.container
   ]
-} 
+}
 
 module "external-lb-https" {
   source  = "./modules/external-lb"

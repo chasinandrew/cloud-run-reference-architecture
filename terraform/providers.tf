@@ -7,6 +7,6 @@ terraform {
     }
   }
   cloud {
-  
+
   }
 }
