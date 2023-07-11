@@ -16,6 +16,19 @@ module "gh_oidc_wif" {
   }
 }
 
+resource "google_cloud_run_v2_service" "default" {
+  name     = "placeholder"
+  location = var.region
+  project  = var.project_id
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}
+
 resource "google_service_account" "gh_sa" {
   project      = var.project_id
   account_id   = "gh-wif"
@@ -70,16 +83,16 @@ resource "google_cloud_run_service_iam_member" "noauth" {
 
 resource "random_integer" "sneg_id" {
   min = 1
-  max = 1000
+  max = 5
 }
 
 resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
-  name                  = format("sneg-%s", var.project_id)
+  name                  = format("sneg-%s-%s", var.project_id, random_integer.sneg_id.result)
   project               = var.project_id
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
-    service = data.google_cloud_run_service.container.name
+    service = coalesce(data.google_cloud_run_service.container_first_run[0].name, data.google_cloud_run_service.container[0].name)
   }
   lifecycle {
     create_before_destroy = true
@@ -178,4 +191,4 @@ module "secret-manager" {
       secret_data           = var.database_name
     },
   ]
-}
+} 
