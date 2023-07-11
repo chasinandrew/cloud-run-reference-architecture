@@ -27,7 +27,7 @@ resource "google_cloud_run_v2_service" "default" {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
     }
   }
-}#
+}
 
 resource "google_service_account" "gh_sa" {
   project      = var.project_id
