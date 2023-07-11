@@ -19,6 +19,7 @@ module "gh_oidc_wif" {
 resource "google_cloud_run_v2_service" "default" {
   name     = var.frontend_service_name
   location = var.region
+  project = var.project_id
   ingress = "INGRESS_TRAFFIC_INTERNAL_ONLY"
 
   template {
