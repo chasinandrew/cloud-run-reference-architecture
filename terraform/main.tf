@@ -16,6 +16,18 @@ module "gh_oidc_wif" {
   }
 }
 
+resource "google_cloud_run_v2_service" "default" {
+  name     = var.frontend_service_name
+  location = var.region
+  ingress = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}
+
 resource "google_service_account" "gh_sa" {
   project      = var.project_id
   account_id   = "gh-wif"
