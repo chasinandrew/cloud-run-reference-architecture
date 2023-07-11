@@ -92,7 +92,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
-    service = coalesce(data.google_cloud_run_service[0].container_first_run, data.google_cloud_run_service.container[0].name)
+    service = coalesce(data.google_cloud_run_service.container_first_run[0].name, data.google_cloud_run_service.container[0].name)
   }
   lifecycle {
     create_before_destroy = true
