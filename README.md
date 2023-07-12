@@ -81,8 +81,21 @@ The following GitHub secrets must be added to the repository. These secrets can 
 
 ## How to use this repository to deploy infrastructure
 ### General Repository Usage
-1. Fork this repository or copy the code into your own repository. 
-2. 
+1. Create a bare clone of this repository.
+```
+git clone --bare https://github.com/EXAMPLE-USER/OLD-REPOSITORY.git
+```
+2. Mirror push to the new repository. 
+```
+cd OLD-REPOSITORY.git
+git push --mirror https://github.com/EXAMPLE-USER/NEW-REPOSITORY.git
+```
+
+3. Remove the temporary local files. 
+```
+cd ..
+rm -rf OLD-REPOSITORY.git
+```
 ### Terraform Deployment
 1. 
 

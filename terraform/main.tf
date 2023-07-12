@@ -16,32 +16,19 @@ module "gh_oidc_wif" {
   }
 }
 
-resource "google_cloud_run_v2_service" "default" {
-  name     = "placeholder"
-  location = var.region
-  project  = var.project_id
-  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
-
-  template {
-    containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
-    }
-  }
-}
-
 resource "google_service_account" "gh_sa" {
   project      = var.project_id
   account_id   = "gh-wif"
   display_name = "Service Account for auth to push container images and deploy Cloud Run containers."
 }
 
-resource "google_project_iam_binding" "ar_writer" {
+resource "google_project_iam_member" "ar_writer" {
   project = var.project_id
   role    = "roles/artifactregistry.writer"
   members = [google_service_account.gh_sa.member]
 }
 
-resource "google_project_iam_binding" "run_admin" {
+resource "google_project_iam_member" "run_admin" {
   project = var.project_id
   role    = "roles/run.admin"
   members = [google_service_account.gh_sa.member]
@@ -92,7 +79,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
-    service = coalesce(data.google_cloud_run_service.container_first_run[0].name, data.google_cloud_run_service.container[0].name)
+    service = data.google_cloud_run_service.container.name
   }
   lifecycle {
     create_before_destroy = true
