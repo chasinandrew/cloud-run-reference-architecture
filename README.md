@@ -83,12 +83,12 @@ The following GitHub secrets must be added to the repository. These secrets can 
 ### General Repository Usage
 1. Create a bare clone of this repository.
 ```
-git clone --bare https://github.com/EXAMPLE-USER/OLD-REPOSITORY.git
+git clone --bare https://github.com/chasinandrew/cloud-run-reference-architecture.git
 ```
 2. Mirror push to the new repository. 
 ```
 cd OLD-REPOSITORY.git
-git push --mirror https://github.com/EXAMPLE-USER/NEW-REPOSITORY.git
+git push --mirror https://github.com/YOUR-ORG/cloud-run-reference-architecture.git
 ```
 
 3. Remove the temporary local files. 
@@ -96,6 +96,8 @@ git push --mirror https://github.com/EXAMPLE-USER/NEW-REPOSITORY.git
 cd ..
 rm -rf OLD-REPOSITORY.git
 ```
+
 ### Terraform Deployment
-1. 
+1. Ensure your workspace is set up to authenticate with workload identity federation as shown in this documentation.
+2. 
 

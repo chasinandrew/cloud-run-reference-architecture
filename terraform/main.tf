@@ -16,6 +16,27 @@ module "gh_oidc_wif" {
   }
 }
 
+resource "google_cloud_run_v2_service" "default" {
+  name     = "cloudrun-service"
+  location = "us-central1"
+  ingress = "INGRESS_TRAFFIC_ALL"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}
+
+resource "null_resource" "pods" {
+  depends_on = [google_cloud_run_v2_service.default]
+  condition = not data.google_cloud_run_service.container.exists
+
+  provisioner "local-exec" {
+    command = "echo 'Cloud Run service pods does not exist, creating...'"
+  }
+}
+
 resource "google_service_account" "gh_sa" {
   project      = var.project_id
   account_id   = "gh-wif"
