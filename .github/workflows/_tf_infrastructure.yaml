@@ -51,19 +51,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       
-      - name: Google Auth
-        id: auth
-        uses: 'google-github-actions/auth@v0'
-        with:
-          token_format: 'access_token'
-          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+      # - name: Google Auth
+      #   id: auth
+      #   uses: 'google-github-actions/auth@v0'
+      #   with:
+      #     token_format: 'access_token'
+      #     workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+      #     service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
-      #TODO: REMOVE AFTER FIRST RUN
-      - name: Deploy to Cloud Run 
-        if: ${{ inputs.first_run == 'true' }} 
-        run: |- 
-          gcloud run deploy ${{ inputs.service_name }} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ inputs.project_id }} --region ${{ inputs.region }}
+      # #TODO: REMOVE AFTER FIRST RUN
+      # - name: Deploy to Cloud Run 
+      #   if: ${{ inputs.first_run == 'true' }} 
+      #   run: |- 
+      #     gcloud run deploy ${{ inputs.service_name }} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ inputs.project_id }} --region ${{ inputs.region }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -88,7 +88,7 @@ jobs:
       ## Terraform Plan All ENVs
       - name: Terraform Plan DEV
         id: plan_dev
-        run: terraform plan -no-color -input=false -var-file=envs/dev/dev.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        run: terraform plan -no-color -input=false -var-file=envs/dev/dev.tfvars #-var='frontend_service_name=${{ inputs.service_name }}'
         working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Plan QA
@@ -110,7 +110,7 @@ jobs:
       ## Terraform Apply DEV
       - name: Terraform Apply DEV
         if: github.ref == 'refs/heads/develop-iac' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars #-var='frontend_service_name=${{ inputs.service_name }}'
         working-directory: ${{ inputs.working_directory }}
       
       ## Terraform Apply QA
