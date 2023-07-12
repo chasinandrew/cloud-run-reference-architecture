@@ -19,7 +19,3 @@ variable "database_name" {
   description = "The database name to create. "
 }
 
-variable "first_run" {
-  type        = bool
-  description = "Specifies whether this is the first run of the package"
-}

@@ -16,26 +16,21 @@ module "gh_oidc_wif" {
   }
 }
 
-# resource "google_cloud_run_v2_service" "default" {
-#   name     = "cloudrun-service"
-#   location = "us-central1"
-#   ingress = "INGRESS_TRAFFIC_ALL"
+resource "google_cloud_run_v2_service" "default" {
+  name     = var.frontend_service_name
+  location = var.region
+  project  = var.project_id
+  ingress  = "INGRESS_TRAFFIC_INTERNAL"
 
-#   template {
-#     containers {
-#       image = "us-docker.pkg.dev/cloudrun/container/hello"
-#     }
-#   }
-# }
-
-# resource "null_resource" "pods" {
-#   depends_on = [google_cloud_run_v2_service.default]
-#   triggers = data.google_cloud_run_service.container.exists
-
-#   provisioner "local-exec" {
-#     command = "echo 'Cloud Run service pods does not exist, creating...'"
-#   }
-# }
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+  lifecycle {
+    ignore_changes = true
+  }
+}
 
 resource "google_service_account" "gh_sa" {
   project      = var.project_id
@@ -52,7 +47,7 @@ resource "google_project_iam_member" "ar_writer" {
 resource "google_project_iam_member" "run_admin" {
   project = var.project_id
   role    = "roles/run.admin"
-  member = google_service_account.gh_sa.member
+  member  = google_service_account.gh_sa.member
 }
 
 resource "google_artifact_registry_repository" "docker_repo" {
@@ -68,7 +63,7 @@ resource "google_tags_location_tag_binding" "binding" {
   tag_value = "tagValues/1067211650924"
   location  = var.region
   depends_on = [
-    data.google_cloud_run_service.container
+    google_cloud_run_v2_service.default
   ]
 }
 
@@ -84,7 +79,7 @@ resource "google_cloud_run_service_iam_member" "noauth" {
   role     = "roles/run.invoker"
   member   = "allUsers"
   depends_on = [
-    data.google_cloud_run_service.container,
+    google_cloud_run_v2_service.default,
     time_sleep.wait_120_seconds
   ]
 }
@@ -100,14 +95,14 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
-    service = data.google_cloud_run_service.container.name
+    service = google_cloud_run_v2_service.default.name
   }
   lifecycle {
     create_before_destroy = true
   }
   depends_on = [
     random_integer.sneg_id,
-    data.google_cloud_run_service.container
+    google_cloud_run_v2_service.default
   ]
 }
 
