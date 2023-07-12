@@ -30,8 +30,8 @@ resource "google_cloud_run_v2_service" "default" {
 
 resource "null_resource" "pods" {
   depends_on = [google_cloud_run_v2_service.default]
-  condition = not data.google_cloud_run_service.container.exists
-  
+  condition = data.google_cloud_run_service.container.exists
+
   provisioner "local-exec" {
     command = "echo 'Cloud Run service pods does not exist, creating...'"
   }
