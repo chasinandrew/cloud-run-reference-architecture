@@ -11,7 +11,7 @@ on:
         description: Working directory of Terraform code. 
       service_name: 
         type: string 
-        required: true
+        required: false
         description: Service name of Cloud Run instance. 
       first_run: 
         type: string 
