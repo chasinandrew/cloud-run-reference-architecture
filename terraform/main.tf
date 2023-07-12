@@ -33,7 +33,7 @@ resource "null_resource" "pods" {
   condition = not data.google_cloud_run_service.container.exists
 
   provisioner "local-exec" {
-    command = "echo 'Cloud Run service pods does not exist, creating...'"
+    command = "echo Cloud Run service pods does not exist, creating..."
   }
 }
 
