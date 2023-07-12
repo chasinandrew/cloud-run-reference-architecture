@@ -42,7 +42,7 @@ resource "google_cloud_run_v2_service" "default" {
     }
   }
   lifecycle {
-    ignore_changes = ["*"]
+    ignore_changes = all
   }
 }
 
