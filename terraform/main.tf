@@ -20,7 +20,7 @@ resource "google_cloud_run_v2_service" "default" {
   name     = var.frontend_service_name
   location = var.region
   project  = var.project_id
-  ingress  = "INGRESS_TRAFFIC_INTERNAL"
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
 
   template {
     containers {
@@ -41,7 +41,7 @@ resource "google_service_account" "gh_sa" {
 resource "google_project_iam_member" "ar_writer" {
   project = var.project_id
   role    = "roles/artifactregistry.writer"
-  members = google_service_account.gh_sa.member
+  member = google_service_account.gh_sa.member
 }
 
 resource "google_project_iam_member" "run_admin" {
