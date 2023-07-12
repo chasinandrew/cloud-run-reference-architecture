@@ -16,26 +16,26 @@ module "gh_oidc_wif" {
   }
 }
 
-resource "google_cloud_run_v2_service" "default" {
-  name     = "cloudrun-service"
-  location = "us-central1"
-  ingress = "INGRESS_TRAFFIC_ALL"
+# resource "google_cloud_run_v2_service" "default" {
+#   name     = "cloudrun-service"
+#   location = "us-central1"
+#   ingress = "INGRESS_TRAFFIC_ALL"
 
-  template {
-    containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
-    }
-  }
-}
+#   template {
+#     containers {
+#       image = "us-docker.pkg.dev/cloudrun/container/hello"
+#     }
+#   }
+# }
 
-resource "null_resource" "pods" {
-  depends_on = [google_cloud_run_v2_service.default]
-  condition = data.google_cloud_run_service.container.exists
+# resource "null_resource" "pods" {
+#   depends_on = [google_cloud_run_v2_service.default]
+#   triggers = data.google_cloud_run_service.container.exists
 
-  provisioner "local-exec" {
-    command = "echo 'Cloud Run service pods does not exist, creating...'"
-  }
-}
+#   provisioner "local-exec" {
+#     command = "echo 'Cloud Run service pods does not exist, creating...'"
+#   }
+# }
 
 resource "google_service_account" "gh_sa" {
   project      = var.project_id
@@ -46,13 +46,13 @@ resource "google_service_account" "gh_sa" {
 resource "google_project_iam_member" "ar_writer" {
   project = var.project_id
   role    = "roles/artifactregistry.writer"
-  members = [google_service_account.gh_sa.member]
+  members = google_service_account.gh_sa.member
 }
 
 resource "google_project_iam_member" "run_admin" {
   project = var.project_id
   role    = "roles/run.admin"
-  members = [google_service_account.gh_sa.member]
+  member = google_service_account.gh_sa.member
 }
 
 resource "google_artifact_registry_repository" "docker_repo" {
