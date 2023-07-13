@@ -89,7 +89,7 @@ resource "random_integer" "sneg_id" {
   max = 5
   lifecycle {
     replace_triggered_by = [
-      google_compute_region_network_endpoint_group.id
+      google_compute_region_network_endpoint_group.cloudrun_sneg.id
     ]
   }
 }
