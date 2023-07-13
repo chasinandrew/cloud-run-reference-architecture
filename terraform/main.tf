@@ -27,9 +27,9 @@ resource "google_cloud_run_v2_service" "default" {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
     }
   }
-  lifecycle {
-    ignore_changes = all
-  }
+  # lifecycle {
+  #   ignore_changes = all
+  # }
 }
 
 resource "google_service_account" "gh_sa" {
@@ -53,7 +53,7 @@ resource "google_project_iam_member" "run_admin" {
 resource "google_artifact_registry_repository" "docker_repo" {
   project       = var.project_id
   location      = var.region
-  repository_id = var.frontend_service_name
+  repository_id = format("%s-repo", var.project_id)
   description   = "Docker repository for container images."
   format        = "DOCKER"
 }
