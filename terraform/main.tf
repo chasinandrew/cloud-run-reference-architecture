@@ -90,7 +90,7 @@ resource "random_integer" "sneg_id" {
 }
 
 resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
-  name                  = format("sneg-%s-%s", var.project_id, random_integer.sneg_id.result)
+  name                  = format("sneg-%s", random_integer.sneg_id.result)
   project               = var.project_id
   network_endpoint_type = "SERVERLESS"
   region                = var.region

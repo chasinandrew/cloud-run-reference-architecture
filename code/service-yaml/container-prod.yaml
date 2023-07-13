@@ -15,7 +15,7 @@ spec:
         run.googleapis.com/vpc-access-connector: projects/arched-inkwell-368821/locations/us-east4/connectors/pods-2
         autoscaling.knative.dev/minScale: '3'
         autoscaling.knative.dev/maxScale: '100'
-      labels: #TODO: change all labels #
+      labels: 
         region: us-east4
         app_code: placeholder
         classification: placeholder
@@ -23,7 +23,7 @@ spec:
         department_id: placeholder
         hca_project_id: placeholder
         tco_id: placeholder
-        app_environment: dev #
+        app_environment: dev 
     spec:
       containerConcurrency: 80
       serviceAccountName: ${CLOUD_RUN_SA}
@@ -58,7 +58,5 @@ spec:
               key: "1" 
      
   traffic: 
-  - revisionName: ${SERVICE_NAME}-${REVISION_TAG}
-    percent: 50
-  - revisionName: pods-f1b3a7b82ff322033c06e8804900a7d8e30e5427
-    percent: 50
+  - latestRevision: true
+    percent: 100 
