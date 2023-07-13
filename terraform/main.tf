@@ -85,13 +85,8 @@ resource "google_cloud_run_service_iam_member" "noauth" {
 }
 
 resource "random_integer" "sneg_id" {
-  min = 1
+  min = 5
   max = 50
-  lifecycle {
-    replace_triggered_by = [
-      google_compute_region_network_endpoint_group.cloudrun_sneg.id
-    ]
-  }
 }
 
 resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
