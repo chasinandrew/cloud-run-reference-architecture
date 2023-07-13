@@ -106,7 +106,6 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
     create_before_destroy = true
   }
   depends_on = [
-    random_integer.sneg_id,
     google_cloud_run_v2_service.default
   ]
 }
