@@ -2,15 +2,15 @@
 module "gh_oidc_wif" {
   source      = "./modules/wif"
   project_id  = var.project_id
-  pool_id     = "gh-push-auth-pool"
-  provider_id = "gh-push-auth-provider"
+  pool_id     = "gh-push-oidc-pool"
+  provider_id = "gh-push-oidc-provider"
   sa_mapping = {
     "gh-push" = {
       sa_name   = google_service_account.gh_sa.id
       attribute = "attribute.repository/user/repo"
     }
   }
-  attribute_condition = "google.subject.contains(\"chasinandrew/sample-code\")"
+  attribute_condition = "google.subject.contains(\"${var.repository_name}\")"
   attribute_mapping = {
     "google.subject" = "assertion.repository"
   }
@@ -27,14 +27,14 @@ resource "google_cloud_run_v2_service" "default" {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
     }
   }
-  # lifecycle {
-  #   ignore_changes = all
-  # }
+  lifecycle {
+    ignore_changes = template[0].containers[0].image
+  }
 }
 
 resource "google_service_account" "gh_sa" {
   project      = var.project_id
-  account_id   = "gh-wif"
+  account_id   = "gh-wif-sa"
   display_name = "Service Account for auth to push container images and deploy Cloud Run containers."
 }
 
@@ -50,17 +50,17 @@ resource "google_project_iam_member" "run_admin" {
   member  = google_service_account.gh_sa.member
 }
 
-resource "google_artifact_registry_repository" "docker_repo" {
+resource "google_artifact_registry_repository" "repository" {
   project       = var.project_id
   location      = var.region
   repository_id = format("%s-repo", var.project_id)
-  description   = "Docker repository for container images."
-  format        = "DOCKER"
+  description   = format("%s repository for storing container images.", var.artifact_registry_format)
+  format        = var.artifact_registry_format
 }
 
 resource "google_tags_location_tag_binding" "binding" {
   parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/${var.frontend_service_name}"
-  tag_value = "tagValues/1067211650924"
+  tag_value = format("tagValues/%s", var.domain_restricted_sharing_tag)
   location  = var.region
   depends_on = [
     google_cloud_run_v2_service.default
@@ -138,7 +138,7 @@ module "external-lb-https" {
     }
   }
   ssl                             = true
-  managed_ssl_certificate_domains = ["test.com"]
+  managed_ssl_certificate_domains = [var.partially_qualified_domain_name] #e.g. sample.com, NOT www.sample.com
   create_address                  = true
   depends_on                      = [google_compute_region_network_endpoint_group.cloudrun_sneg]
 }

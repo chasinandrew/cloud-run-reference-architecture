@@ -98,6 +98,8 @@ rm -rf OLD-REPOSITORY.git
 ```
 
 ### Terraform Deployment
-1. Ensure your workspace is set up to authenticate with workload identity federation as shown in (this documentation)[https://cloud.google.com/blog/products/identity-security/secure-your-use-of-third-party-tools-with-identity-federation].
-2. 
+1. Ensure your workspace is set up to authenticate with workload identity federation as shown in [this documentation](https://cloud.google.com/blog/products/identity-security/secure-your-use-of-third-party-tools-with-identity-federation).
+2. Ensure secret **TF_API_KEY** is created for authenticating to Terraform Cloud from GitHub. 
+3. Change values under the *with:* field to match your GCP configuration in this [GitHub Actions workflow](./.github/workflows/tf_infrastructure.yaml)
+4. Change values in the [dev.tfvars file](./terraform/envs/dev/dev.tfvars) to match your infrastructure deployment.
 

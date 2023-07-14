@@ -2,4 +2,5 @@ project_id            = "arched-inkwell-368821"
 region                = "us-east4"
 frontend_service_name = "new-again"
 database_name         = "yktv"
-first_run = true
+domain_restricted_sharing_tag = "1067211650924"
+repository_name = "chasinandrew/cloud-run-reference-architecture"

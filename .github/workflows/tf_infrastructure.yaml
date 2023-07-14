@@ -28,7 +28,6 @@ jobs:
     with: 
       environment: dev-iac
       working_directory: ./terraform
-      # service_name: new
       first_run: false
       workspace_name: cloud-run-reference-architecture
       terraform_org: google-testing-org

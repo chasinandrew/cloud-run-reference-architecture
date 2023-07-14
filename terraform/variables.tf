@@ -19,7 +19,23 @@ variable "database_name" {
   description = "The database name to create. "
 }
 
-variable "first_run" {
-  type        = bool
-  description = "Indicates whether this is the first run of the Terraform code" 
+variable "repository_name" {
+  type        = string
+  description = "Repository name where Cloud Run will be deployed from." 
+}
+
+variable "artifact_registry_format" { 
+  type = string
+  description = "Type of Artifact Registry repository."
+  default = "DOCKER"
+}
+
+variable "domain_restricted_sharing_tag" { 
+  type = string
+  description = "Tag to be applied to Cloud Run to exempt the instance from domain restricted sharing."
+}
+
+variable "partially_qualified_domain_name" {
+  type = string 
+  description = 
 }
