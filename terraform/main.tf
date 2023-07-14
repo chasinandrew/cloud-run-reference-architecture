@@ -2,8 +2,8 @@
 module "gh_oidc_wif" {
   source      = "./modules/wif"
   project_id  = var.project_id
-  pool_id     = "gh-push-oidc-pool"
-  provider_id = "gh-push-oidc-provider"
+  pool_id     = "github-oidc-pool"
+  provider_id = "github-oidc-provider"
   sa_mapping = {
     "gh-push" = {
       sa_name   = google_service_account.gh_sa.id
