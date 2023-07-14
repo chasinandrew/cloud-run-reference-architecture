@@ -1,6 +1,6 @@
 project_id            = "arched-inkwell-368821"
 region                = "us-east4"
-frontend_service_name = "new-again"
+frontend_service_name = "new-"
 database_name         = "yktv"
 domain_restricted_sharing_tag = "1067211650924"
 partially_qualified_domain_name = "mytestapp.com"
