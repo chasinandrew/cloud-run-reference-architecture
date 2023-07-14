@@ -2,8 +2,8 @@
 module "gh_oidc_wif" {
   source      = "./modules/wif"
   project_id  = var.project_id
-  pool_id     = "github-oidc-pool"
-  provider_id = "github-oidc-provider"
+  pool_id     = format("github-oidc-pool-%s", random_integer.sneg_id.result)
+  provider_id = format("github-oidc-provider-%s", random_integer.sneg_id.result)
   sa_mapping = {
     "gh-push" = {
       sa_name   = google_service_account.gh_sa.id
@@ -27,9 +27,9 @@ resource "google_cloud_run_v2_service" "default" {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
     }
   }
-  # lifecycle {
-  #   ignore_changes = allUsers
-  # }
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "google_service_account" "gh_sa" {
