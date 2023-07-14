@@ -96,7 +96,7 @@ jobs:
       ## Terraform Apply DEV
       - name: Terraform Apply DEV
         if: github.ref == 'refs/heads/develop-iac' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars #-var='frontend_service_name=${{ inputs.service_name }}'
+        run: terraform destroy -auto-approve -input=false -var-file=envs/dev/dev.tfvars #-var='frontend_service_name=${{ inputs.service_name }}'
         working-directory: ${{ inputs.working_directory }}
       
       ## Terraform Apply QA
