@@ -37,5 +37,5 @@ variable "domain_restricted_sharing_tag" {
 
 variable "partially_qualified_domain_name" {
   type = string 
-  description = 
+  description = "Domain name for Global Load Balancer with Cloud Run. "
 }
