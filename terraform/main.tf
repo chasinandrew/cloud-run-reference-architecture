@@ -41,7 +41,7 @@ resource "google_service_account" "gh_sa" {
 resource "google_project_iam_member" "ar_writer" {
   project = var.project_id
   role    = "roles/artifactregistry.writer"
-  member = google_service_account.gh_sa.member
+  member  = google_service_account.gh_sa.member
 }
 
 resource "google_project_iam_member" "run_admin" {
@@ -193,5 +193,5 @@ module "secret-manager" {
       secret_data           = var.database_name
     },
   ]
-} 
+}
 
