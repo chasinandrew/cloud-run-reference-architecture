@@ -5,106 +5,49 @@ on:
     - 'terraform/**'
     branches:
     - 'feature/**'
-    - 'develop-iac'
-    - 'qa-iac'
-    - 'main-iac'
+    - 'develop'
+    - 'qa'
+    - 'main'
   pull_request:
     paths: 
     - 'terraform/**'
     branches:
     - 'feature/**'
-    - 'develop-iac'
-    - 'qa-iac'
-    - 'main-iac'
-
-env: 
-  WORKING_DIRECTORY: ./terraform
-  SERVICE_NAME: pods
+    - 'develop'
+    - 'qa'
+    - 'main'
 
 jobs:
-  terraform: 
-    name: "Terraform Deployment"
-    runs-on: ubuntu-latest
-    permissions:
+  dev:
+    uses: ./.github/workflows/_tf_infrastructure.yaml
+    permissions: 
       actions: read
       id-token: write
       contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      
-      - name: Google Auth
-        id: auth
-        uses: 'google-github-actions/auth@v0'
-        with:
-          token_format: 'access_token'
-          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'     # e.g. - my-service-account@my-project.iam.gserviceaccount.com
-
-      #TODO: REMOVE AFTER FIRST RUN
-      # - name: Deploy to Cloud Run 
-      #   run: |- 
-      #     gcloud run deploy ${{ env.CONTAINER_SERVICE }} --image us-docker.pkg.dev/cloudrun/container/hello:latest --project ${{ env.PROJECT_ID }} --region ${{ env.REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          cli_config_credentials_token: ${{ secrets.TF_API_KEY }}
-
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt 
-
-      - name: Terraform Init
-        id: init
-        run: terraform init
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-      
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-
-      ## Terraform Plan All ENVs
-      - name: Terraform Plan DEV
-        id: plan_dev
-        run: terraform plan -no-color -input=false -var-file=envs/dev/dev.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Terraform Plan QA
-        id: plan_qa
-        if: github.ref == 'refs/heads/develop-iac' && github.event_name == 'pull_request'
-        run: terraform plan -no-color -input=false -var-file=envs/qa/qa.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Terraform Plan PROD
-        id: plan_prod
-        if: github.ref == 'refs/heads/qa-iac' && github.event_name == 'pull_request'
-        run: terraform plan -no-color -input=false -var-file=envs/prod/prod.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      ## Terraform Apply DEV
-      - name: Terraform Apply DEV
-        if: github.ref == 'refs/heads/develop-iac' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-      
-      ## Terraform Apply QA
-      - name: Terraform Apply QA
-        if: github.ref == 'refs/heads/qa-iac' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=envs/qa/qa.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      ## Terraform Apply PROD
-      - name: Terraform Apply PROD
-        if: github.ref == 'refs/heads/main-iac' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -var-file=envs/prod/prod.tfvars -var='frontend_service_name=${{ env.SERVICE_NAME }}'
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-        
-
-
+    with: 
+      environment: dev-iac
+      working_directory: ./terraform
+      first_run: false
+      workspace_name: cloud-run-reference-architecture
+      terraform_org: google-testing-org
+      project_id: arched-inkwell-368821
+      region: us-east4
+    secrets: inherit
+  # qa:
+  #   if: github.head_ref == 'develop' 
+  #   uses: ./.github/workflows/_tf_infrastructure.yaml
+  #   permissions: 
+  #     actions: read
+  #     id-token: write
+  #     contents: read
+  #   with: 
+  #     environment: qa-iac
+  #     working_directory: ./terraform
+  #     service_name: hello
+  #     first_run: false
+  #     workspace_name: cloud-run-reference-architecture
+  #     terraform_org: google-testing-org
+  #     project_id: arched-inkwell-368821
+  #     region: us-east4
+  #   secrets: inherit
+  

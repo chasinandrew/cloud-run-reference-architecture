@@ -7,7 +7,7 @@ This Cloud Run Deployment Pattern is designed for large enterprises with strict 
 The actions that this repository will execute are: 
 
 * Create a Global External HTTPS load balancer in front of an existing Cloud Run service.  
-* Pull a Terraform Data Source for Cloud Run. *NOTE: If a Cloud Run instance does not already exist, this repository can create a helloworld container on the fly in the GitHub Actions Workflow. This instance would then be replaced by your applications first revision.* 
+* Create a Cloud Run instance with the *Hello World* image. This image will be replaced after the first application deployment. Terraform will ignore all changes to the Cloud Run instance and will only replace it if the instance is removed from state. 
 * Create a Cloud SQL instance, SQL Server dialect, with relevant databases, public IP and private IP. 
 * Stores connection information securely in Secret Manager. 
 * Apply a tag for excluding the Cloud Run service from Domain Restricted Sharing organization policy.
@@ -15,7 +15,7 @@ The actions that this repository will execute are:
 * Create an Artifact Registry repository to store Docker images. 
 * Create a serverless connector to route all Cloud Run traffic through.
 
-### Architecture Diagram
+### Architecture Diagrams
 #### Terraform Deployment
 ![alt text](./images/serverless-web-app.jpeg "Serverless Web Application Architecture")
 
@@ -81,8 +81,26 @@ The following GitHub secrets must be added to the repository. These secrets can 
 
 ## How to use this repository to deploy infrastructure
 ### General Repository Usage
-1. Fork this repository or copy the code into your own repository. 
-2. 
+1. Create a bare clone of this repository.
+```
+git clone --bare https://github.com/chasinandrew/cloud-run-reference-architecture.git
+```
+2. Mirror push to the new repository. 
+```
+cd OLD-REPOSITORY.git
+git push --mirror https://github.com/YOUR-ORG/cloud-run-reference-architecture.git
+```
+
+3. Remove the temporary local files. 
+```
+cd ..
+rm -rf OLD-REPOSITORY.git
+```
+
 ### Terraform Deployment
-1. 
+1. Ensure your workspace is set up to authenticate with workload identity federation as shown in [this cloud blog](https://cloud.google.com/blog/products/identity-security/secure-your-use-of-third-party-tools-with-identity-federation).
+2. Ensure secret **TF_API_KEY** is created for authenticating to Terraform Cloud from GitHub. 
+3. Change values under the *with:* field to match your GCP configuration in this [GitHub Actions workflow](./.github/workflows/tf_infrastructure.yaml)
+4. Change values in the [dev.tfvars file](./terraform/envs/dev/dev.tfvars) to match your infrastructure deployment.
+5. Raise a pull request from your feature branch to the develop branch. This will trigger a plan. Review the plan and if all looks good, merge to develop. Once merged, a *terraform apply* will run. 
 

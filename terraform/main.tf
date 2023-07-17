@@ -1,57 +1,74 @@
+
 module "gh_oidc_wif" {
   source      = "./modules/wif"
   project_id  = var.project_id
-  pool_id     = "gh-push-auth-pool"
-  provider_id = "gh-push-auth-provider"
+  pool_id     = format("github-oidc-pool-%s", random_integer.sneg_id.result)
+  provider_id = format("github-oidc-provider-%s", random_integer.sneg_id.result)
   sa_mapping = {
     "gh-push" = {
       sa_name   = google_service_account.gh_sa.id
       attribute = "attribute.repository/user/repo"
     }
   }
-  attribute_condition = "google.subject.contains(\"chasinandrew/sample-code\")"
+  attribute_condition = "google.subject.contains(\"${var.repository_name}\")"
   attribute_mapping = {
     "google.subject" = "assertion.repository"
   }
 }
 
-resource "google_service_account" "gh_sa" { 
-  project      = var.project_id
-  account_id   = "gh-wif"
-  display_name = "Service Account for auth to push container images and deploy Cloud Run containers."
-} 
+resource "google_cloud_run_v2_service" "default" {
+  name     = var.frontend_service_name
+  location = var.region
+  project  = var.project_id
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
 
-resource "google_project_iam_binding" "ar_writer" {
-  project = var.project_id 
-  role    = "roles/artifactregistry.writer" 
-  members = [google_service_account.gh_sa.member]
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
-resource "google_project_iam_binding" "run_admin" {
+resource "google_service_account" "gh_sa" {
+  project      = var.project_id
+  account_id   = "gh-wif-sa"
+  display_name = "Service Account for auth to push container images and deploy Cloud Run containers."
+}
+
+resource "google_project_iam_member" "ar_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member = google_service_account.gh_sa.member
+}
+
+resource "google_project_iam_member" "run_admin" {
   project = var.project_id
   role    = "roles/run.admin"
-  members = [google_service_account.gh_sa.member]
+  member  = google_service_account.gh_sa.member
 }
 
-resource "google_artifact_registry_repository" "docker_repo" {
+resource "google_artifact_registry_repository" "repository" {
   project       = var.project_id
   location      = var.region
-  repository_id = var.frontend_service_name
-  description   = "Docker repository for container images."
-  format        = "DOCKER"
+  repository_id = format("%s-repo", var.project_id)
+  description   = format("%s repository for storing container images.", var.artifact_registry_format)
+  format        = var.artifact_registry_format
 }
 
 resource "google_tags_location_tag_binding" "binding" {
   parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/${var.frontend_service_name}"
-  tag_value = "tagValues/1067211650924"
+  tag_value = format("tagValues/%s", var.domain_restricted_sharing_exclusion_tag)
   location  = var.region
   depends_on = [
-    data.google_cloud_run_service.container
+    google_cloud_run_v2_service.default
   ]
 }
 
 resource "time_sleep" "wait_120_seconds" {
-  depends_on = [ google_tags_location_tag_binding.binding ]
+  depends_on      = [google_tags_location_tag_binding.binding]
   create_duration = "120s"
 }
 
@@ -59,17 +76,17 @@ resource "google_cloud_run_service_iam_member" "noauth" {
   location = var.region
   project  = var.project_id
   service  = var.frontend_service_name
-  role    = "roles/run.invoker"
+  role     = "roles/run.invoker"
   member   = "allUsers"
   depends_on = [
-    data.google_cloud_run_service.container,
+    google_cloud_run_v2_service.default,
     time_sleep.wait_120_seconds
   ]
 }
 
 resource "random_integer" "sneg_id" {
-  min = 1
-  max = 1000
+  min = 5
+  max = 50
 }
 
 resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
@@ -78,18 +95,20 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_sneg" {
   network_endpoint_type = "SERVERLESS"
   region                = var.region
   cloud_run {
-    service = data.google_cloud_run_service.container.name
+    service = google_cloud_run_v2_service.default.name
+  }
+  lifecycle {
+    create_before_destroy = true
   }
   depends_on = [
-    random_integer.sneg_id,
-    data.google_cloud_run_service.container
+    google_cloud_run_v2_service.default
   ]
 }
 
 module "external-lb-https" {
   source  = "./modules/external-lb"
   project = var.project_id
-  name    = format("https-lb-%s", random_integer.sneg_id.result)
+  name    = format("https-lb-%s", var.project_id)
   backends = {
     default = {
       description             = null
@@ -119,7 +138,7 @@ module "external-lb-https" {
     }
   }
   ssl                             = true
-  managed_ssl_certificate_domains = ["test.com"]
+  managed_ssl_certificate_domains = [var.partially_qualified_domain_name] #e.g. sample.com, NOT www.sample.com
   create_address                  = true
   depends_on                      = [google_compute_region_network_endpoint_group.cloudrun_sneg]
 }
@@ -137,9 +156,9 @@ module "mssql_db" {
     random_password = true
   }]
   additional_databases = [{
-    name = var.database_name
+    name      = var.database_name
     collation = "SQL_Latin1_General_CP1_CI_AS"
-    charset = "UTF8"
+    charset   = "UTF8"
   }]
   deletion_protection = false
 }
@@ -150,28 +169,29 @@ resource "random_password" "root-password" {
 }
 
 module "secret-manager" {
-  source  = "./modules/secret-manager"
+  source     = "./modules/secret-manager"
   project_id = var.project_id
   secrets = [
     {
-      name                     = "DB_PASSWORD"
-      automatic_replication    = true
-      secret_data              = random_password.root-password.result
+      name                  = "DB_ROOT_PASSWORD"
+      automatic_replication = true
+      secret_data           = random_password.root-password.result
     },
     {
-      name                     = "DB_USERNAME"
-      automatic_replication    = true
-      secret_data              = "sqlserver"
+      name                  = "DB_ROOT_USERNAME"
+      automatic_replication = true
+      secret_data           = "sqlserver"
     },
     {
-      name                     = "DB_CONNECTION_NAME"
-      automatic_replication    = true
-      secret_data              = module.mssql_db.instance_connection_name
+      name                  = "DB_CONNECTION_NAME"
+      automatic_replication = true
+      secret_data           = module.mssql_db.instance_connection_name
     },
     {
-      name                     = "DB_NAME"
-      automatic_replication    = true
-      secret_data              = var.database_name
+      name                  = "DB_NAME"
+      automatic_replication = true
+      secret_data           = var.database_name
     },
   ]
-}
+} 
+

@@ -1,0 +1,115 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+        description: Name of the target deployment environment. Acceptable values are 'dev', 'qa', or 'prod'.
+      working_directory:
+        type: string
+        required: true
+        description: Working directory of Terraform code. 
+      service_name: 
+        type: string 
+        required: false
+        description: Service name of Cloud Run instance. 
+      first_run: 
+        type: string 
+        required: false
+        description: Flag to specify whether this is the first run of the workflow. If it is, it will create a new helloworld cloud run instance. 
+      workspace_name: 
+        type: string 
+        required: true 
+        description: Terraform workspace name.
+      project_id:
+        type: string
+        required: true
+        description: GCP Project ID.
+      region: 
+        type: string 
+        required: true  
+        description: Cloud Run region for deployment. 
+      terraform_org: 
+        type: string 
+        required: true
+        description: Terraform organization where the workspace resides. 
+
+
+jobs:
+  terraform: 
+    name: "Terraform Deployment"
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env: 
+      TF_WORKSPACE: ${{ inputs.workspace_name }}
+      TF_CLOUD_ORGANIZATION: ${{ inputs.terraform_org }}
+    permissions:
+      actions: read
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_KEY }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt 
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ${{ inputs.working_directory }}
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ${{ inputs.working_directory }}
+
+
+      ## Terraform Plan All ENVs
+      - name: Terraform Plan DEV
+        id: plan_dev
+        run: terraform plan -no-color -input=false -var-file=envs/dev/dev.tfvars
+        working-directory: ${{ inputs.working_directory }}
+
+      - name: Terraform Plan QA
+        if: ${{ inputs.environment == 'qa' }} 
+        id: plan_qa
+        run: terraform plan -no-color -input=false -var-file=envs/qa/qa.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        working-directory: ${{ inputs.working_directory }}
+
+      - name: Terraform Plan PROD
+        if: ${{ inputs.environment == 'main' }} 
+        id: plan_prod
+        run: terraform plan -no-color -input=false -var-file=envs/prod/prod.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
+        working-directory: ${{ inputs.working_directory }}
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      ## Terraform Apply DEV
+      - name: Terraform Apply DEV
+        if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars 
+        working-directory: ${{ inputs.working_directory }}
+      
+      ## Terraform Apply QA
+      - name: Terraform Apply QA
+        if: github.ref == 'refs/heads/qa' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=envs/qa/qa.tfvars 
+        working-directory: ${{ inputs.working_directory }}
+
+      ## Terraform Apply PROD
+      - name: Terraform Apply PROD
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -var-file=envs/prod/prod.tfvars
+        working-directory: ${{ inputs.working_directory }}
+        
+
+
