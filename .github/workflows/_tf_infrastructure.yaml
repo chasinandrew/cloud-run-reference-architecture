@@ -78,13 +78,13 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Plan QA
-        if: ${{ inputs.environment == 'qa-iac' }} 
+        if: ${{ inputs.environment == 'qa' }} 
         id: plan_qa
         run: terraform plan -no-color -input=false -var-file=envs/qa/qa.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
         working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Plan PROD
-        if: ${{ inputs.environment == 'main-iac' }} 
+        if: ${{ inputs.environment == 'main' }} 
         id: plan_prod
         run: terraform plan -no-color -input=false -var-file=envs/prod/prod.tfvars -var='frontend_service_name=${{ inputs.service_name }}'
         working-directory: ${{ inputs.working_directory }}
@@ -95,19 +95,19 @@ jobs:
 
       ## Terraform Apply DEV
       - name: Terraform Apply DEV
-        if: github.ref == 'refs/heads/develop-iac' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false -var-file=envs/dev/dev.tfvars 
         working-directory: ${{ inputs.working_directory }}
       
       ## Terraform Apply QA
       - name: Terraform Apply QA
-        if: github.ref == 'refs/heads/qa-iac' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/qa' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false -var-file=envs/qa/qa.tfvars 
         working-directory: ${{ inputs.working_directory }}
 
       ## Terraform Apply PROD
       - name: Terraform Apply PROD
-        if: github.ref == 'refs/heads/main-iac' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false -var-file=envs/prod/prod.tfvars
         working-directory: ${{ inputs.working_directory }}
         

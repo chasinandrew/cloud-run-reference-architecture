@@ -5,21 +5,21 @@ on:
     - 'terraform/**'
     branches:
     - 'feature/**'
-    - 'develop-iac'
-    - 'qa-iac'
-    - 'main-iac'
+    - 'develop'
+    - 'qa'
+    - 'main'
   pull_request:
     paths: 
     - 'terraform/**'
     branches:
     - 'feature/**'
-    - 'develop-iac'
-    - 'qa-iac'
-    - 'main-iac'
+    - 'develop'
+    - 'qa'
+    - 'main'
 
 jobs:
   dev:
-    if: github.head_ref != 'develop-iac' || github.head_ref != 'qa-iac'
+    if: github.head_ref != 'develop' || github.head_ref != 'qa'
     uses: ./.github/workflows/_tf_infrastructure.yaml
     permissions: 
       actions: read
@@ -34,21 +34,21 @@ jobs:
       project_id: arched-inkwell-368821
       region: us-east4
     secrets: inherit
-  qa:
-    if: github.head_ref == 'develop-iac'
-    uses: ./.github/workflows/_tf_infrastructure.yaml
-    permissions: 
-      actions: read
-      id-token: write
-      contents: read
-    with: 
-      environment: qa-iac
-      working_directory: ./terraform
-      service_name: hello
-      first_run: false
-      workspace_name: cloud-run-reference-architecture
-      terraform_org: google-testing-org
-      project_id: arched-inkwell-368821
-      region: us-east4
-    secrets: inherit
+  # qa:
+  #   if: github.head_ref == 'develop' 
+  #   uses: ./.github/workflows/_tf_infrastructure.yaml
+  #   permissions: 
+  #     actions: read
+  #     id-token: write
+  #     contents: read
+  #   with: 
+  #     environment: qa-iac
+  #     working_directory: ./terraform
+  #     service_name: hello
+  #     first_run: false
+  #     workspace_name: cloud-run-reference-architecture
+  #     terraform_org: google-testing-org
+  #     project_id: arched-inkwell-368821
+  #     region: us-east4
+  #   secrets: inherit
   
