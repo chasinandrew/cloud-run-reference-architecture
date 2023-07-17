@@ -19,7 +19,6 @@ on:
 
 jobs:
   dev:
-    if: github.head_ref != 'develop' || github.head_ref != 'qa'
     uses: ./.github/workflows/_tf_infrastructure.yaml
     permissions: 
       actions: read
