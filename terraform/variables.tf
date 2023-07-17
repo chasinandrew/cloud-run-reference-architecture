@@ -30,7 +30,7 @@ variable "artifact_registry_format" {
   default = "DOCKER"
 }
 
-variable "domain_restricted_sharing_tag" { 
+variable "domain_restricted_sharing_exclusion_tag" { 
   type = string
   description = "Tag to be applied to Cloud Run to exempt the instance from domain restricted sharing."
 }

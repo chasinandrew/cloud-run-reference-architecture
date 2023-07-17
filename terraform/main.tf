@@ -60,7 +60,7 @@ resource "google_artifact_registry_repository" "repository" {
 
 resource "google_tags_location_tag_binding" "binding" {
   parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${var.region}/services/${var.frontend_service_name}"
-  tag_value = format("tagValues/%s", var.domain_restricted_sharing_tag)
+  tag_value = format("tagValues/%s", var.domain_restricted_sharing_exclusion_tag)
   location  = var.region
   depends_on = [
     google_cloud_run_v2_service.default
@@ -195,16 +195,3 @@ module "secret-manager" {
   ]
 } 
 
-# resource "google_dns_record_set" "a" {
-#   name         = "backend.${google_dns_managed_zone.prod.dns_name}"##
-#   managed_zone = google_dns_managed_zone.prod.name
-#   type         = "A"
-#   ttl          = 300
-
-#   rrdatas = ["8.8.8.8"]
-# }
-
-# resource "google_dns_managed_zone" "prod" {
-#   name     = "prod-zone"
-#   dns_name = "prod.mydomain.com."
-# }
