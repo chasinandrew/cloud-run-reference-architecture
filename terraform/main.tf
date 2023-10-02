@@ -153,6 +153,7 @@ module "mssql_db" {
   additional_users = [{
     name            = format("%s-user", var.project_id)
     password        = random_password.non-root-password.result
+    random_password = false
   }]
   additional_databases = [{
     name      = var.database_name
