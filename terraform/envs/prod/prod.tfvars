@@ -1,4 +1,4 @@
-project_id                              = "arched-inkwell-368821"
+project_id                              = "hca-demo-qa"
 region                                  = "us-east4"
 frontend_service_name                   = "new-new"
 database_name                           = "yktv"
