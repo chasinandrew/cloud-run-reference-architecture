@@ -151,7 +151,7 @@ module "mssql_db" {
   zone          = "us-east4-a"
   root_password = random_password.root-password.result
   additional_users = [{
-    name            = format("%s-non-root-user")
+    name            = format("%s-user", var.project_id)
     password        = random_password.non-root-password.result
   }]
   additional_databases = [{
