@@ -28,7 +28,7 @@ locals {
   retained_backups = lookup(var.backup_configuration, "retained_backups", null)
   retention_unit   = lookup(var.backup_configuration, "retention_unit", null)
 }
-
+#
 resource "random_id" "suffix" {
   count = var.random_instance_name ? 1 : 0
 
