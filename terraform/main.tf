@@ -160,6 +160,10 @@ module "mssql_db" {
     charset   = "UTF8"
   }]
   deletion_protection = false
+  depends_on = [ 
+    random_password.non-root-password,
+    random_password.root-password 
+  ]
 }
 
 resource "random_password" "root-password" {
