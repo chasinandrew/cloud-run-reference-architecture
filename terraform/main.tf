@@ -151,9 +151,8 @@ module "mssql_db" {
   zone          = "us-east4-a"
   root_password = random_password.root-password.result
   additional_users = [{
-    name            = "sqlusertest"
-    password        = ""
-    random_password = true
+    name            = format("%s-non-root-user")
+    password        = random_password.non-root-password.result
   }]
   additional_databases = [{
     name      = var.database_name
@@ -168,6 +167,11 @@ resource "random_password" "root-password" {
   special = true
 }
 
+resource "random_password" "non-root-password" {
+  length  = 8
+  special = true
+}
+
 module "secret-manager" {
   source     = "./modules/secret-manager"
   project_id = var.project_id
@@ -178,9 +182,9 @@ module "secret-manager" {
       secret_data           = random_password.root-password.result
     },
     {
-      name                  = "DB_ROOT_USERNAME"
+      name                  = "DB_PASSWORD"
       automatic_replication = true
-      secret_data           = "sqlserver"
+      secret_data           = random_password.non-root-password.result
     },
     {
       name                  = "DB_CONNECTION_NAME"
