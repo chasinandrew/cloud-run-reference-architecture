@@ -28,7 +28,7 @@ jobs:
       environment: dev-iac
       working_directory: ./terraform
       first_run: false
-      workspace_name: cloud-run-reference-architecture
+      workspace_name: demo-dev
       terraform_org: google-testing-org
       project_id: hca-demo-dev
       region: us-east4

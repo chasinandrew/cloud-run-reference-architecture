@@ -170,7 +170,7 @@ module "mssql_db" {
 resource "random_password" "root-password" {
   length  = 8
   special = true
-}
+}#
 
 resource "random_password" "non-root-password" {
   length  = 8
