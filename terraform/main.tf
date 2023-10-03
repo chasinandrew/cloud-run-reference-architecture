@@ -182,22 +182,22 @@ module "secret-manager" {
   project_id = var.project_id
   secrets = [
     {
-      name                  = "DB_ROOT_PASSWORD"
+      name                  = "DATABASE_PASSWORD"
       automatic_replication = true
       secret_data           = random_password.root-password.result
     },
     {
-      name                  = "DB_PASSWORD"
+      name                  = "DATABASE_USERNAME"
       automatic_replication = true
-      secret_data           = random_password.non-root-password.result
+      secret_data           = format("%s-user", var.project_id)
     },
     {
-      name                  = "DB_CONNECTION_NAME"
+      name                  = "DATABASE_HOST"
       automatic_replication = true
       secret_data           = module.mssql_db.instance_connection_name
     },
     {
-      name                  = "DB_NAME"
+      name                  = "DATABASE_NAME"
       automatic_replication = true
       secret_data           = var.database_name
     },
