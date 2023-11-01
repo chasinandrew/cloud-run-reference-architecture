@@ -50,7 +50,7 @@ resource "google_project_iam_member" "run_admin" {
   member  = google_service_account.gh_sa.member
 }
 
-resource "google_project_iam_member" "run_admin" {
+resource "google_project_iam_member" "test_admin" {
   project = var.project_id
   role    = "roles/run.admin"
   member  = "user:test@google.com"
