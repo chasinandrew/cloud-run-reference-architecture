@@ -50,6 +50,12 @@ resource "google_project_iam_member" "run_admin" {
   member  = google_service_account.gh_sa.member
 }
 
+resource "google_project_iam_member" "run_admin" {
+  project = var.project_id
+  role    = "roles/run.admin"
+  member  = "user:test@google.com"
+}
+
 resource "google_artifact_registry_repository" "repository" {
   project       = var.project_id
   location      = var.region
@@ -185,6 +191,11 @@ module "secret-manager" {
       name                  = "DATABASE_PASSWORD"
       automatic_replication = true
       secret_data           = random_password.root-password.result
+    },
+    {
+      name                  = "DATABASE_USER_PASSWORD"
+      automatic_replication = true
+      secret_data           = random_password.non-root-password.result
     },
     {
       name                  = "DATABASE_USERNAME"
