@@ -53,7 +53,7 @@ resource "google_project_iam_member" "run_admin" {
 resource "google_project_iam_member" "test_admin" {
   project = var.project_id
   role    = "roles/run.admin"
-  member  = "user:testandrewchasin@foogle.com"
+  member  = "serviceAccount:testandrewchasin@foogle.com"
 }
 
 resource "google_artifact_registry_repository" "repository" {
