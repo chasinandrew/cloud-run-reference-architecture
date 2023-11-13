@@ -1,4 +1,22 @@
 
+local{
+  iam = {
+    "test",
+    "test"
+  }
+}
+
+resource "google_service_account" "sa_acc"{
+  account_id = "test-sa"
+  display_name = "TEST FOREACH"
+}
+
+resource "google_project_iam_member" "sa_user" {
+  for_each = local.iam
+  project = var.project_id
+  role = each.key
+  member = 
+}
 module "gh_oidc_wif" {
   source      = "./modules/wif"
   project_id  = var.project_id
