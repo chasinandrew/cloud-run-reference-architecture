@@ -1,9 +1,9 @@
 
 locals {
-  iam = {
+  iam = toset([
     "test",
     "test"
-  }
+  ])
 }
 
 resource "google_service_account" "sa_acc"{
