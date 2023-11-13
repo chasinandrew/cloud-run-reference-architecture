@@ -1,5 +1,5 @@
 
-local{
+locals {
   iam = {
     "test",
     "test"
