@@ -15,7 +15,7 @@ resource "google_project_iam_member" "sa_user" {
   for_each = local.iam
   project = var.project_id
   role = each.key
-  member = 
+  member = google_service_account.sa_user.member
 }
 module "gh_oidc_wif" {
   source      = "./modules/wif"
